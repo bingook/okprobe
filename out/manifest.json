@@ -1,12 +1,8 @@
 {
- "ts": "2026-10-26T19:41:57Z",
- "phase": "sweep",
- "egress_ip": "20.168.124.222",
+ "ts": "2026-10-26T20:58:27Z",
+ "phase": "oracle",
+ "egress_ip": "13.83.233.96",
  "health": true,
- "enum": [
-  40136000,
-  40152000
- ],
  "counts": {
   "members_live.csv": 2447,
   "loans_realtime.csv": 2,
