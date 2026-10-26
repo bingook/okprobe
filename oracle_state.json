@@ -184,88 +184,97 @@
  },
  "crack": {
   "dongmin": {
-   "pwd_idx": 233
+   "pwd_idx": 251
   },
   "admin": {
-   "pwd_idx": 233
+   "pwd_idx": 251
   },
   "kimdongmin": {
-   "pwd_idx": 233
+   "pwd_idx": 251
   },
   "kdongmin": {
-   "pwd_idx": 233
+   "pwd_idx": 251
   },
   "manager": {
-   "pwd_idx": 233
+   "pwd_idx": 251
   },
   "admin01": {
-   "pwd_idx": 233
+   "pwd_idx": 251
   },
   "admin1": {
-   "pwd_idx": 233
+   "pwd_idx": 251
   },
   "admin2": {
-   "pwd_idx": 233
+   "pwd_idx": 251
   },
   "administrator": {
-   "pwd_idx": 233
+   "pwd_idx": 251
   },
   "bigyo": {
-   "pwd_idx": 233
+   "pwd_idx": 251
   },
   "bigyoadmin": {
-   "pwd_idx": 233
+   "pwd_idx": 251
   },
   "cs": {
-   "pwd_idx": 233
+   "pwd_idx": 251
   },
   "demo": {
-   "pwd_idx": 233
+   "pwd_idx": 251
   },
   "dev": {
-   "pwd_idx": 233
+   "pwd_idx": 251
   },
   "finance": {
-   "pwd_idx": 233
+   "pwd_idx": 251
   },
   "guest": {
-   "pwd_idx": 233
+   "pwd_idx": 251
   },
   "jung": {
-   "pwd_idx": 233
+   "pwd_idx": 251
   },
   "loan": {
-   "pwd_idx": 233
+   "pwd_idx": 251
   },
   "master": {
-   "pwd_idx": 233
+   "pwd_idx": 251
   },
   "ok": {
-   "pwd_idx": 233
+   "pwd_idx": 251
   },
   "okbank": {
-   "pwd_idx": 233
+   "pwd_idx": 251
   },
   "okbigyo": {
-   "pwd_idx": 233
+   "pwd_idx": 251
   },
   "oper": {
-   "pwd_idx": 233
+   "pwd_idx": 251
   },
   "ops": {
-   "pwd_idx": 233
+   "pwd_idx": 251
   },
   "partner": {
-   "pwd_idx": 233
+   "pwd_idx": 251
   },
   "product": {
-   "pwd_idx": 233
+   "pwd_idx": 251
   },
   "qa": {
-   "pwd_idx": 233
+   "pwd_idx": 251
   },
   "root": {
-   "pwd_idx": 109
+   "pwd_idx": 251
+  },
+  "staff": {
+   "pwd_idx": 251
+  },
+  "super": {
+   "pwd_idx": 251
+  },
+  "superadmin": {
+   "pwd_idx": 70
   }
  },
  "bridge": {
@@ -288,7 +297,7 @@
    "pwd_idx": 12
   },
   "oper": {
-   "pwd_idx": 8
+   "pwd_idx": 12
   },
   "admin01": {
    "pwd_idx": 12
@@ -339,6 +348,15 @@
    "pwd_idx": 12
   },
   "okbigyo": {
+   "pwd_idx": 12
+  },
+  "ops": {
+   "pwd_idx": 12
+  },
+  "partner": {
+   "pwd_idx": 12
+  },
+  "product": {
    "pwd_idx": 8
   }
  },
@@ -2476,6 +2494,105 @@
   "1997": "ghost",
   "1998": "ghost",
   "1999": "ghost",
-  "2000": "ghost"
+  "2000": "ghost",
+  "admin@okbank.com": "ghost",
+  "admin@gmail.com": "ghost",
+  "admin@naver.com": "ghost",
+  "admin01@okbank.com": "ghost",
+  "admin01@gmail.com": "ghost",
+  "admin01@naver.com": "ghost",
+  "admin1@okbank.com": "ghost",
+  "admin1@gmail.com": "ghost",
+  "admin1@naver.com": "ghost",
+  "admin2@okbank.com": "ghost",
+  "admin2@gmail.com": "ghost",
+  "admin2@naver.com": "ghost",
+  "administrator@okbank.com": "ghost",
+  "administrator@gmail.com": "ghost",
+  "administrator@naver.com": "ghost",
+  "bigyo@okbank.com": "ghost",
+  "bigyo@gmail.com": "ghost",
+  "bigyo@naver.com": "ghost",
+  "bigyoadmin@okbank.com": "ghost",
+  "bigyoadmin@gmail.com": "ghost",
+  "bigyoadmin@naver.com": "ghost",
+  "cs@okbank.com": "ghost",
+  "cs@gmail.com": "ghost",
+  "cs@naver.com": "ghost",
+  "demo@okbank.com": "ghost",
+  "demo@gmail.com": "ghost",
+  "demo@naver.com": "ghost",
+  "dev@okbank.com": "ghost",
+  "dev@gmail.com": "ghost",
+  "dev@naver.com": "ghost",
+  "dongmin@okbank.com": "ghost",
+  "dongmin@gmail.com": "ghost",
+  "dongmin@naver.com": "ghost",
+  "finance@okbank.com": "ghost",
+  "finance@gmail.com": "ghost",
+  "finance@naver.com": "ghost",
+  "guest@okbank.com": "ghost",
+  "guest@gmail.com": "ghost",
+  "guest@naver.com": "ghost",
+  "jung@okbank.com": "ghost",
+  "jung@gmail.com": "ghost",
+  "jung@naver.com": "ghost",
+  "kdongmin@okbank.com": "ghost",
+  "kdongmin@gmail.com": "ghost",
+  "kdongmin@naver.com": "ghost",
+  "kimdongmin@okbank.com": "ghost",
+  "kimdongmin@gmail.com": "ghost",
+  "kimdongmin@naver.com": "ghost",
+  "loan@okbank.com": "ghost",
+  "loan@gmail.com": "ghost",
+  "loan@naver.com": "ghost",
+  "manager@okbank.com": "ghost",
+  "manager@gmail.com": "ghost",
+  "manager@naver.com": "ghost",
+  "master@okbank.com": "ghost",
+  "master@gmail.com": "ghost",
+  "master@naver.com": "ghost",
+  "ok@okbank.com": "ghost",
+  "ok@gmail.com": "ghost",
+  "ok@naver.com": "ghost",
+  "okbank@okbank.com": "ghost",
+  "okbank@gmail.com": "ghost",
+  "okbank@naver.com": "ghost",
+  "okbigyo@okbank.com": "ghost",
+  "okbigyo@gmail.com": "ghost",
+  "okbigyo@naver.com": "ghost",
+  "oper@okbank.com": "ghost",
+  "oper@gmail.com": "ghost",
+  "oper@naver.com": "ghost",
+  "ops@okbank.com": "ghost",
+  "ops@gmail.com": "ghost",
+  "ops@naver.com": "ghost",
+  "partner@okbank.com": "ghost",
+  "partner@gmail.com": "ghost",
+  "partner@naver.com": "ghost",
+  "product@okbank.com": "ghost",
+  "product@gmail.com": "ghost",
+  "product@naver.com": "ghost",
+  "qa@okbank.com": "ghost",
+  "qa@gmail.com": "ghost",
+  "qa@naver.com": "ghost",
+  "root@okbank.com": "ghost",
+  "root@gmail.com": "ghost",
+  "root@naver.com": "ghost",
+  "staff@okbank.com": "ghost",
+  "staff@gmail.com": "ghost",
+  "staff@naver.com": "ghost",
+  "super@okbank.com": "ghost",
+  "super@gmail.com": "ghost",
+  "super@naver.com": "ghost",
+  "superadmin@okbank.com": "ghost",
+  "superadmin@gmail.com": "ghost",
+  "superadmin@naver.com": "ghost",
+  "test@okbank.com": "ghost",
+  "test@gmail.com": "ghost",
+  "test@naver.com": "ghost",
+  "user@okbank.com": "ghost",
+  "user@gmail.com": "ghost",
+  "user@naver.com": "ghost"
  }
 }
