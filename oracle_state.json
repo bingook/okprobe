@@ -119,7 +119,68 @@
   "ju": "ghost",
   "ji": "ghost",
   "na": "ghost",
-  "so": "ghost"
+  "so": "ghost",
+  "ha": "ghost",
+  "bo": "ghost",
+  "bin": "ghost",
+  "jin": "ghost",
+  "seong": "ghost",
+  "hwa": "ghost",
+  "gil": "ghost",
+  "rok": "ghost",
+  "bang": "ghost",
+  "kevin": "ghost",
+  "david": "ghost",
+  "chris": "ghost",
+  "mike": "ghost",
+  "james": "ghost",
+  "peter": "ghost",
+  "alex": "ghost",
+  "ben": "ghost",
+  "tom": "ghost",
+  "lucy": "ghost",
+  "emma": "ghost",
+  "mia": "ghost",
+  "grace": "ghost",
+  "angel": "ghost",
+  "star": "ghost",
+  "moon": "ghost",
+  "coffee": "ghost",
+  "happy": "ghost",
+  "love": "ghost",
+  "hello": "ghost",
+  "welcome": "ghost",
+  "money": "ghost",
+  "bank": "ghost",
+  "1": "ghost",
+  "2": "ghost",
+  "3": "ghost",
+  "10": "ghost",
+  "100": "ghost",
+  "1000": "ghost",
+  "1001": "ghost",
+  "1002": "ghost",
+  "2001": "ghost",
+  "3001": "ghost",
+  "9999": "ghost",
+  "admin1": "real",
+  "admin2": "real",
+  "admin01": "real",
+  "super": "real",
+  "secret": "ghost",
+  "boss": "ghost",
+  "owner": "ghost",
+  "founder": "ghost",
+  "partner": "real",
+  "president": "ghost",
+  "director": "ghost",
+  "chief": "ghost",
+  "leader": "ghost",
+  "user": "real",
+  "member": "ghost",
+  "maintainer": "ghost",
+  "tester": "ghost",
+  "qa": "real"
  },
  "crack": {
   "dongmin": {
@@ -129,7 +190,13 @@
    "pwd_idx": 95
   },
   "kimdongmin": {
-   "pwd_idx": 10
+   "pwd_idx": 95
+  },
+  "kdongmin": {
+   "pwd_idx": 95
+  },
+  "manager": {
+   "pwd_idx": 20
   }
  },
  "bridge": {
@@ -143,7 +210,16 @@
    "pwd_idx": 12
   },
   "kdongmin": {
-   "pwd_idx": 4
+   "pwd_idx": 12
+  },
+  "manager": {
+   "pwd_idx": 12
+  },
+  "superadmin": {
+   "pwd_idx": 12
+  },
+  "oper": {
+   "pwd_idx": 8
   }
  }
 }
