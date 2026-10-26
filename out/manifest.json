@@ -1,7 +1,7 @@
 {
- "ts": "2026-10-26T14:44:03Z",
+ "ts": "2026-10-26T14:44:39Z",
  "phase": "sweep",
- "egress_ip": "64.236.141.176",
+ "egress_ip": "20.64.66.204",
  "health": true,
  "counts": {
   "members_live.csv": 1008,
