@@ -1,10 +1,10 @@
 {
  "dongmin": {
-  "ts": 1793029586,
+  "ts": 1793048307,
   "via": "oracle"
  },
  "admin": {
-  "ts": 1793029589,
+  "ts": 1793048308,
   "via": "oracle"
  },
  "kimdongmin": {
@@ -60,7 +60,7 @@
   "via": "oracle"
  },
  "master": {
-  "ts": 1793029592,
+  "ts": 1793048311,
   "via": "oracle"
  },
  "root": {
@@ -68,7 +68,7 @@
   "via": "oracle"
  },
  "staff": {
-  "ts": 1793029599,
+  "ts": 1793048315,
   "via": "oracle"
  },
  "test": {
@@ -76,7 +76,7 @@
   "via": "oracle"
  },
  "guest": {
-  "ts": 1793029602,
+  "ts": 1793048318,
   "via": "oracle"
  },
  "cs": {
@@ -92,7 +92,7 @@
   "via": "oracle"
  },
  "product": {
-  "ts": 1793029625,
+  "ts": 1793048332,
   "via": "oracle"
  },
  "okbigyo": {
@@ -100,7 +100,7 @@
   "via": "oracle"
  },
  "okbank": {
-  "ts": 1793029641,
+  "ts": 1793048337,
   "via": "oracle"
  },
  "ok": {
@@ -116,7 +116,7 @@
   "via": "oracle"
  },
  "admin01": {
-  "ts": 1793031972,
+  "ts": 1793048382,
   "via": "oracle"
  },
  "super": {
@@ -124,11 +124,11 @@
   "via": "oracle"
  },
  "partner": {
-  "ts": 1793031978,
+  "ts": 1793048384,
   "via": "oracle"
  },
  "qa": {
-  "ts": 1793031986,
+  "ts": 1793048387,
   "via": "oracle"
  }
 }
