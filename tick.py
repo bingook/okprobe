@@ -106,6 +106,8 @@ def main():
     ok = health()
     manifest = {"ts": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()), "phase": phase, "egress_ip": ip, "health": ok}
 
+    if ok and phase in ("admin", "full") and not os.path.exists(os.path.join(ROOT, "admin_token.json")):
+        sh(["python3", "admin_cracker.py"])
     if ok and phase in ("enum", "full"):
         sl = enum_slice(size)
         if sl:
@@ -115,8 +117,6 @@ def main():
         sh(["python3", "pin_attacker.py"])
     if ok and phase in ("harvest", "full"):
         sh(["python3", "harvest_loans.py"])
-    if ok and phase in ("admin", "full"):
-        sh(["python3", "admin_cracker.py"])
     if ok and phase in ("same_day", "full"):
         sh(["python3", "admin_same_day.py"])
     if ok and phase in ("idor", "full"):
