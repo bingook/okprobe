@@ -184,7 +184,7 @@
  },
  "crack": {
   "dongmin": {
-   "pwd_idx": 95
+   "pwd_idx": 233
   },
   "admin": {
    "pwd_idx": 233
@@ -211,7 +211,22 @@
    "pwd_idx": 233
   },
   "bigyo": {
-   "pwd_idx": 130
+   "pwd_idx": 233
+  },
+  "bigyoadmin": {
+   "pwd_idx": 233
+  },
+  "cs": {
+   "pwd_idx": 233
+  },
+  "demo": {
+   "pwd_idx": 233
+  },
+  "dev": {
+   "pwd_idx": 233
+  },
+  "finance": {
+   "pwd_idx": 27
   }
  },
  "bridge": {
@@ -246,7 +261,16 @@
    "pwd_idx": 12
   },
   "administrator": {
-   "pwd_idx": 4
+   "pwd_idx": 12
+  },
+  "bigyo": {
+   "pwd_idx": 12
+  },
+  "bigyoadmin": {
+   "pwd_idx": 12
+  },
+  "cs": {
+   "pwd_idx": 8
   }
  },
  "derive": {
