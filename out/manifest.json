@@ -1,14 +1,14 @@
 {
- "ts": "2026-10-26T13:18:21Z",
+ "ts": "2026-10-26T13:50:24Z",
  "phase": "full",
- "egress_ip": "4.155.134.55",
+ "egress_ip": "68.220.61.53",
  "health": true,
  "enum": [
-  40024000,
-  40040000
+  40040000,
+  40056000
  ],
  "counts": {
-  "members_live.csv": 758,
+  "members_live.csv": 1008,
   "loans_realtime.csv": 0,
   "same_day_applicants.csv": 0,
   "loan_flows_recent.csv": 0
