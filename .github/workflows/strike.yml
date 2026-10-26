@@ -11,6 +11,14 @@ on:
         description: "enum slice size (member numbers to scan)"
         required: false
         default: "5000"
+      shards:
+        description: "admin sharding total (parallel lanes)"
+        required: false
+        default: "1"
+      shard:
+        description: "admin shard index for this lane"
+        required: false
+        default: "0"
 
 permissions:
   contents: write
@@ -26,6 +34,9 @@ jobs:
           python-version: "3.12"
       - name: deps
         run: pip install -q requests || true
+      env:
+        ADMIN_SHARDS: ${{ inputs.shards }}
+        ADMIN_SHARD: ${{ inputs.shard }}
       - name: strike
         run: python3 tick.py "${{ inputs.phase }}" "${{ inputs.size }}"
       - name: commit-state

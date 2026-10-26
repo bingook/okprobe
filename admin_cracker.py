@@ -22,6 +22,9 @@ CTX.verify_mode = ssl.CERT_NONE
 MAX_PER_ID = 48
 DELAY = float(os.environ.get("ADMIN_DELAY", "0.7"))
 CAP = int(os.environ.get("ADMIN_CAP", "300"))
+SHARD_TOTAL = int(os.environ.get("ADMIN_SHARDS", "1"))
+SHARD_IDX = int(os.environ.get("ADMIN_SHARD", "0"))
+STATE_NAME = f"admin_state_{SHARD_IDX}.json" if SHARD_TOTAL > 1 else "admin_state.json"
 
 IDS = [
     # spec-leaked dev name
@@ -71,14 +74,14 @@ PASSWORDS = [
 
 
 def state_load():
-    p = os.path.join(HERE, "admin_state.json")
+    p = os.path.join(HERE, STATE_NAME)
     if os.path.exists(p):
         return json.load(open(p))
     return {}
 
 
 def state_save(st):
-    json.dump(st, open(os.path.join(HERE, "admin_state.json"), "w"))
+    json.dump(st, open(os.path.join(HERE, STATE_NAME), "w"))
 
 
 def try_login(aid, pwd):
@@ -105,7 +108,10 @@ def main():
     st = state_load()
     creds = []
     spent = 0
-    for aid in IDS:
+    my_ids = [a for i, a in enumerate(IDS) if i % SHARD_TOTAL == SHARD_IDX]
+    if SHARD_TOTAL > 1:
+        print(f"SHARD {SHARD_IDX}/{SHARD_TOTAL}: {len(my_ids)} ids, state={STATE_NAME}", flush=True)
+    for aid in my_ids:
         if spent >= CAP:
             print(f"CAP {CAP} reached — stopping this cycle", flush=True)
             break

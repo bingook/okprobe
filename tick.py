@@ -2,7 +2,8 @@
 """Strike driver for GitHub Actions runs. Flat-layout: scripts + state live in cwd.
 
 usage: tick.py PHASE SIZE
-PHASE: health | enum | pin | harvest | admin | same_day | idor | full
+PHASE: health | enum | pin | harvest | admin | same_day | idor | full | sweep
+# full and sweep are identical; admin is driven by dedicated sharded lanes.
 SIZE : enum slice size (numbers to scan this run)
 """
 import json
@@ -106,7 +107,7 @@ def main():
     ok = health()
     manifest = {"ts": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()), "phase": phase, "egress_ip": ip, "health": ok}
 
-    if ok and phase in ("admin", "full") and not os.path.exists(os.path.join(ROOT, "admin_token.json")):
+    if ok and phase in ("admin",) and not os.path.exists(os.path.join(ROOT, "admin_token.json")):
         sh(["python3", "admin_cracker.py"])
     if ok and phase in ("enum", "full"):
         sl = enum_slice(size)
@@ -117,6 +118,8 @@ def main():
         sh(["python3", "pin_attacker.py"])
     if ok and phase in ("harvest", "full"):
         sh(["python3", "harvest_loans.py"])
+    if ok and phase in ("reset",):
+        sh(["python3", "reset_probe.py"])
     if ok and phase in ("same_day", "full"):
         sh(["python3", "admin_same_day.py"])
     if ok and phase in ("idor", "full"):
