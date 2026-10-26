@@ -138,6 +138,10 @@ _TIER3 = [
     "Manager1234!", "Operator1234!", "Developer1234!", "developer1234!",
     "engineer1234!", "Tester1234!", "Demo1234!", "Guest1234!", "Staff1234!",
     "Partner1234!", "Finance1234!", "Cs1234!", "Support1234!", "Care1234!",
+    # PIN-shaped tier: dev-template admin accounts plausibly use PIN-grade laziness
+    "121212", "111111", "123412", "112233", "123123", "101010", "123456",
+    "000000", "100100", "123321", "111100", "10101010", "11111111",
+    "12345678", "87654321", "202424", "202525", "202626", "1234", "1111",
 ]
 
 
