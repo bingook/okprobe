@@ -37,7 +37,10 @@
    "pwd_idx": 251
   },
   "root": {
-   "pwd_idx": 141
+   "pwd_idx": 251
+  },
+  "superadmin": {
+   "pwd_idx": 251
   }
  },
  "bridge": {
@@ -60,7 +63,16 @@
    "pwd_idx": 12
   },
   "master": {
-   "pwd_idx": 8
+   "pwd_idx": 12
+  },
+  "okbigyo": {
+   "pwd_idx": 12
+  },
+  "partner": {
+   "pwd_idx": 12
+  },
+  "root": {
+   "pwd_idx": 12
   }
  },
  "enum_done": {
