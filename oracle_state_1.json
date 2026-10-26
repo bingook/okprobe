@@ -40,7 +40,10 @@
    "pwd_idx": 251
   },
   "staff": {
-   "pwd_idx": 151
+   "pwd_idx": 251
+  },
+  "test": {
+   "pwd_idx": 251
   }
  },
  "bridge": {
@@ -63,7 +66,16 @@
    "pwd_idx": 12
   },
   "ok": {
-   "pwd_idx": 8
+   "pwd_idx": 12
+  },
+  "oper": {
+   "pwd_idx": 12
+  },
+  "product": {
+   "pwd_idx": 12
+  },
+  "staff": {
+   "pwd_idx": 12
   }
  },
  "enum_done": {
