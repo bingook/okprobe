@@ -141,6 +141,9 @@ def main():
     if ok and (phase in FULLISH or phase == "flowdig"):
         if os.path.exists(os.path.join(ROOT, "cracked_tokens.json")):
             sh(["python3", "flow_digger.py"])
+    if ok and (phase in FULLISH or phase == "inject"):
+        if os.path.exists(os.path.join(ROOT, "cracked_tokens.json")):
+            sh(["python3", "param_inject.py"])
 
     manifest["counts"] = count_lines(
         "members_live.csv", "loans_realtime.csv", "same_day_applicants.csv", "loan_flows_recent.csv"
