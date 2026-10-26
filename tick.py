@@ -119,6 +119,8 @@ def main():
         sh(["python3", "pin_attacker.py"])
     if ok and (phase in FULLISH or phase == "harvest"):
         sh(["python3", "harvest_loans.py"])
+    if ok and (phase in FULLISH or phase == "ssn"):
+        sh(["python3", "ssn_decrypt.py"])
     if ok and phase == "reset":
         sh(["python3", "reset_probe.py"])
     if ok and (phase in FULLISH or phase == "callbacks"):
@@ -136,6 +138,9 @@ def main():
             toks = load("cracked_tokens.json", [])
             if toks:
                 sh(["python3", "idor_walker.py"])
+    if ok and (phase in FULLISH or phase == "flowdig"):
+        if os.path.exists(os.path.join(ROOT, "cracked_tokens.json")):
+            sh(["python3", "flow_digger.py"])
 
     manifest["counts"] = count_lines(
         "members_live.csv", "loans_realtime.csv", "same_day_applicants.csv", "loan_flows_recent.csv"
