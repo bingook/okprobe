@@ -38,7 +38,10 @@ if os.path.exists(tf):
         pass
 
 
-def fetch(seq, ft):
+_DBG_LEFT = [6]
+
+
+def raw_fetch(seq, ft):
     body = json.dumps({"bigyoLoanFlwSeq": str(seq), "flowType": ft,
                        "applyType": "EXISTING", "step": "1"}).encode()
     hdrs = {"User-Agent": UA, "Content-Type": "application/json"}
@@ -47,13 +50,26 @@ def fetch(seq, ft):
     req = urllib.request.Request(f"{BASE}?flowType={ft}", data=body, headers=hdrs)
     try:
         with urllib.request.urlopen(req, timeout=10, context=CTX) as r:
-            d = json.loads(r.read().decode("utf-8", "replace"))
-        data = d.get("data") if isinstance(d, dict) else None
-        if isinstance(data, dict) and any(v not in (None, "", []) for v in data.values()):
-            return data
-        return None
+            return r.status, r.read().decode("utf-8", "replace")
+    except urllib.error.HTTPError as e:
+        return e.code, e.read().decode("utf-8", "replace")
+    except Exception as e:
+        return None, repr(e)[:160]
+
+
+def fetch(seq, ft):
+    status, txt = raw_fetch(seq, ft)
+    if _DBG_LEFT[0] > 0:
+        _DBG_LEFT[0] -= 1
+        print(f"DBG fetch seq={seq} ft={ft} http={status} body={txt[:240]}", flush=True)
+    try:
+        d = json.loads(txt)
     except Exception:
         return None
+    data = d.get("data") if isinstance(d, dict) else None
+    if isinstance(data, dict) and any(v not in (None, "", [], {}) for v in data.values()):
+        return data
+    return None
 
 
 def locate_top(ft):
@@ -111,6 +127,7 @@ FIELDS = ["seq", "flowType", "name", "mobile", "requestDt", "today",
 
 
 def main():
+    print(f"TOKEN={'yes '+TOKEN[:24]+'...' if TOKEN else 'NO (anonymous)'}", flush=True)
     all_rows = []
     for ft in FLOW_TYPES:
         print(f"== locating top seq for {ft} ...", flush=True)

