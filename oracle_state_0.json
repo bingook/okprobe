@@ -7,25 +7,37 @@
    "pwd_idx": 0
   },
   "admin": {
-   "pwd_idx": 233
+   "pwd_idx": 251
   },
   "loan": {
    "pwd_idx": 0
   },
   "dev": {
-   "pwd_idx": 233
+   "pwd_idx": 251
   },
   "admin2": {
-   "pwd_idx": 233
+   "pwd_idx": 251
   },
   "bigyoadmin": {
-   "pwd_idx": 233
+   "pwd_idx": 251
   },
   "guest": {
-   "pwd_idx": 233
+   "pwd_idx": 251
   },
   "kimdongmin": {
-   "pwd_idx": 35
+   "pwd_idx": 251
+  },
+  "master": {
+   "pwd_idx": 251
+  },
+  "okbigyo": {
+   "pwd_idx": 251
+  },
+  "partner": {
+   "pwd_idx": 251
+  },
+  "root": {
+   "pwd_idx": 141
   }
  },
  "bridge": {
@@ -39,7 +51,16 @@
    "pwd_idx": 12
   },
   "dev": {
-   "pwd_idx": 4
+   "pwd_idx": 12
+  },
+  "guest": {
+   "pwd_idx": 12
+  },
+  "kimdongmin": {
+   "pwd_idx": 12
+  },
+  "master": {
+   "pwd_idx": 8
   }
  },
  "enum_done": {
