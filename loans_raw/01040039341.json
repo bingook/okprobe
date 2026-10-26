@@ -1,0 +1,30 @@
+{
+ "loans": {
+  "result": "SUCCESS",
+  "reason": "성공",
+  "data": [],
+  "total": null
+ },
+ "myinfo": {
+  "success": true,
+  "data": {
+   "memberSeq": 155373,
+   "mobile": "01040039341",
+   "mobileEnc": "D5D95E04F76E68CDE337672ED55F78EC",
+   "name": "여동수",
+   "pinNumber": "",
+   "nickName": null,
+   "socialSecurityNumber": "95AF2E7E6C8063199535FE21E9D881F2",
+   "carrier": "KT",
+   "birthday": "771102"
+  },
+  "message": "",
+  "total": null
+ },
+ "summary": {
+  "result": "SUCCESS",
+  "reason": "",
+  "data": [],
+  "total": null
+ }
+}

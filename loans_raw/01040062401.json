@@ -1,0 +1,30 @@
+{
+ "loans": {
+  "result": "SUCCESS",
+  "reason": "성공",
+  "data": [],
+  "total": null
+ },
+ "myinfo": {
+  "success": true,
+  "data": {
+   "memberSeq": 63692,
+   "mobile": "01040062401",
+   "mobileEnc": "188479EE2FBA86DF262475B09C7C0795",
+   "name": "김영란",
+   "pinNumber": "",
+   "nickName": null,
+   "socialSecurityNumber": "6D4AAACFD69F85B818305C90E7B10350",
+   "carrier": "KT",
+   "birthday": "770305"
+  },
+  "message": "",
+  "total": null
+ },
+ "summary": {
+  "result": "SUCCESS",
+  "reason": "",
+  "data": [],
+  "total": null
+ }
+}
