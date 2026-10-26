@@ -67,6 +67,9 @@
   },
   "super": {
    "pwd_idx": 12
+  },
+  "user": {
+   "pwd_idx": 12
   }
  },
  "enum_done": {
