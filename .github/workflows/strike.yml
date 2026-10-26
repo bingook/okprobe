@@ -35,4 +35,4 @@ jobs:
           git config user.name okprobe-bot
           git add -A
           git diff --cached --quiet || git commit -m "strike#${{ github.run_number }} ${{ inputs.phase }}"
-          git push
+          git push 2>/dev/null || ( git pull --no-rebase --no-edit || true; git push || git push --force-with-lease; )

