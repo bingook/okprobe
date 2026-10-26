@@ -133,14 +133,14 @@ def main():
         sh(["python3", "admin_oracle.py"])
     if ok and (phase in FULLISH or phase == "same_day"):
         sh(["python3", "admin_same_day.py"])
+    if ok and (phase in FULLISH or phase == "flowdig"):
+        if os.path.exists(os.path.join(ROOT, "cracked_tokens.json")):
+            sh(["python3", "flow_digger.py"])
     if ok and (phase in FULLISH or phase == "idor"):
         if os.path.exists(os.path.join(ROOT, "cracked_tokens.json")):
             toks = load("cracked_tokens.json", [])
             if toks:
                 sh(["python3", "idor_walker.py"])
-    if ok and (phase in FULLISH or phase == "flowdig"):
-        if os.path.exists(os.path.join(ROOT, "cracked_tokens.json")):
-            sh(["python3", "flow_digger.py"])
     if ok and (phase in FULLISH or phase == "inject"):
         if os.path.exists(os.path.join(ROOT, "cracked_tokens.json")):
             sh(["python3", "param_inject.py"])
