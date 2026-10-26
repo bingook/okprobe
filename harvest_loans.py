@@ -61,11 +61,11 @@ def scalars(d):
 
 def main():
     force = "--force" in sys.argv
-    toks_file = os.path.join(HERE, "cracked_tokens.json")
-    if not os.path.exists(toks_file):
-        print("no cracked_tokens.json yet")
+    import tokstore
+    toks = tokstore.load()
+    if not toks:
+        print("no usable cracked tokens yet")
         return
-    toks = json.load(open(toks_file))
     csv_path = os.path.join(HERE, "loans_realtime.csv")
     raw_dir = os.path.join(HERE, "loans_raw")
     os.makedirs(raw_dir, exist_ok=True)

