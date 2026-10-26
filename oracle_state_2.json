@@ -1,0 +1,89 @@
+{
+ "enum_done": {
+  "kdongmin": "ghost",
+  "manager": "real",
+  "superadmin": "real",
+  "oper": "real",
+  "demo": "real",
+  "support": "ghost",
+  "biz": "ghost",
+  "loan": "real",
+  "coo": "ghost",
+  "dev": "real",
+  "programmer": "ghost",
+  "pm": "ghost",
+  "designer": "ghost",
+  "pr": "ghost",
+  "bookkeeper": "ghost",
+  "contract": "ghost",
+  "bigyo": "real",
+  "coocon": "ghost",
+  "bigyoadmin": "real",
+  "bigyo1": "ghost",
+  "okteam": "ghost",
+  "okcare": "ghost",
+  "okoffice": "ghost",
+  "okloan": "ghost",
+  "bigyodev": "ghost",
+  "hyemin": "ghost",
+  "jiwoo": "ghost",
+  "sungmin": "ghost",
+  "yejin": "ghost",
+  "haerin": "ghost",
+  "junho": "ghost",
+  "woohyuk": "ghost",
+  "hyunsik": "ghost",
+  "byeongsu": "ghost",
+  "minho": "ghost",
+  "taejun": "ghost",
+  "ho": "ghost",
+  "young": "ghost",
+  "ju": "ghost",
+  "so": "ghost",
+  "bin": "ghost",
+  "hwa": "ghost",
+  "bang": "ghost",
+  "chris": "ghost",
+  "peter": "ghost",
+  "tom": "ghost",
+  "mia": "ghost",
+  "star": "ghost",
+  "happy": "ghost",
+  "welcome": "ghost",
+  "1": "ghost",
+  "10": "ghost",
+  "1001": "ghost",
+  "3001": "ghost",
+  "admin2": "real",
+  "secret": "ghost",
+  "founder": "ghost",
+  "director": "ghost",
+  "user": "real",
+  "tester": "ghost"
+ },
+ "crack": {
+  "manager": {
+   "pwd_idx": 95
+  },
+  "superadmin": {
+   "pwd_idx": 95
+  },
+  "oper": {
+   "pwd_idx": 10
+  }
+ },
+ "bridge": {
+  "manager": {
+   "pwd_idx": 12
+  },
+  "superadmin": {
+   "pwd_idx": 12
+  },
+  "oper": {
+   "pwd_idx": 12
+  },
+  "demo": {
+   "pwd_idx": 4
+  }
+ }
+}

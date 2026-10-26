@@ -1,0 +1,42 @@
+{
+ "manager": {
+  "ts": 1793026276,
+  "via": "oracle"
+ },
+ "superadmin": {
+  "ts": 1793026278,
+  "via": "oracle"
+ },
+ "oper": {
+  "ts": 1793026279,
+  "via": "oracle"
+ },
+ "demo": {
+  "ts": 1793026280,
+  "via": "oracle"
+ },
+ "loan": {
+  "ts": 1793026286,
+  "via": "oracle"
+ },
+ "dev": {
+  "ts": 1793026288,
+  "via": "oracle"
+ },
+ "bigyo": {
+  "ts": 1793026306,
+  "via": "oracle"
+ },
+ "bigyoadmin": {
+  "ts": 1793026308,
+  "via": "oracle"
+ },
+ "admin2": {
+  "ts": 1793026361,
+  "via": "oracle"
+ },
+ "user": {
+  "ts": 1793026365,
+  "via": "oracle"
+ }
+}
