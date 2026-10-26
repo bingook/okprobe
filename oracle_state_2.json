@@ -1,7 +1,7 @@
 {
  "crack": {
   "user": {
-   "pwd_idx": 0
+   "pwd_idx": 251
   },
   "demo": {
    "pwd_idx": 251
@@ -34,7 +34,7 @@
    "pwd_idx": 251
   },
   "super": {
-   "pwd_idx": 236
+   "pwd_idx": 251
   }
  },
  "bridge": {
@@ -57,7 +57,16 @@
    "pwd_idx": 12
   },
   "okbank": {
-   "pwd_idx": 8
+   "pwd_idx": 12
+  },
+  "ops": {
+   "pwd_idx": 12
+  },
+  "qa": {
+   "pwd_idx": 12
+  },
+  "super": {
+   "pwd_idx": 12
   }
  },
  "enum_done": {
