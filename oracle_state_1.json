@@ -76,6 +76,9 @@
   },
   "staff": {
    "pwd_idx": 12
+  },
+  "test": {
+   "pwd_idx": 12
   }
  },
  "enum_done": {
