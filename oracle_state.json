@@ -190,13 +190,13 @@
    "pwd_idx": 233
   },
   "kimdongmin": {
-   "pwd_idx": 95
+   "pwd_idx": 233
   },
   "kdongmin": {
-   "pwd_idx": 95
+   "pwd_idx": 233
   },
   "manager": {
-   "pwd_idx": 20
+   "pwd_idx": 39
   },
   "admin01": {
    "pwd_idx": 233
@@ -226,7 +226,16 @@
    "pwd_idx": 233
   },
   "finance": {
-   "pwd_idx": 27
+   "pwd_idx": 233
+  },
+  "guest": {
+   "pwd_idx": 233
+  },
+  "jung": {
+   "pwd_idx": 233
+  },
+  "loan": {
+   "pwd_idx": 233
   }
  },
  "bridge": {
@@ -270,7 +279,16 @@
    "pwd_idx": 12
   },
   "cs": {
-   "pwd_idx": 8
+   "pwd_idx": 12
+  },
+  "demo": {
+   "pwd_idx": 12
+  },
+  "dev": {
+   "pwd_idx": 12
+  },
+  "finance": {
+   "pwd_idx": 12
   }
  },
  "derive": {
