@@ -1,0 +1,20 @@
+{
+ "crack": {
+  "manager": {
+   "pwd_idx": 95
+  },
+  "dongmin": {
+   "pwd_idx": 0
+  },
+  "admin": {
+   "pwd_idx": 0
+  },
+  "loan": {
+   "pwd_idx": 0
+  },
+  "dev": {
+   "pwd_idx": 0
+  }
+ },
+ "bridge": {}
+}

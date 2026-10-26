@@ -1,0 +1,20 @@
+{
+ "crack": {
+  "superadmin": {
+   "pwd_idx": 95
+  },
+  "oper": {
+   "pwd_idx": 10
+  },
+  "bigyo": {
+   "pwd_idx": 0
+  },
+  "bigyoadmin": {
+   "pwd_idx": 0
+  },
+  "admin2": {
+   "pwd_idx": 0
+  }
+ },
+ "bridge": {}
+}
