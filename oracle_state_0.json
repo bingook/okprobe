@@ -73,6 +73,9 @@
   },
   "root": {
    "pwd_idx": 12
+  },
+  "superadmin": {
+   "pwd_idx": 12
   }
  },
  "enum_done": {
