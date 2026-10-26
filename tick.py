@@ -121,6 +121,12 @@ def main():
         sh(["python3", "harvest_loans.py"])
     if ok and phase == "reset":
         sh(["python3", "reset_probe.py"])
+    if ok and (phase in FULLISH or phase == "callbacks"):
+        sh(["python3", "callback_probe.py"])
+    if ok and (phase in FULLISH or phase == "jwtforge") and not os.path.exists(os.path.join(ROOT, "admin_token.json")):
+        sh(["python3", "jwt_forger.py"])
+    if ok and (phase in FULLISH or phase == "selfreg") and not os.path.exists(os.path.join(ROOT, "admin_token.json")):
+        sh(["python3", "admin_selfreg.py"])
     if ok and (phase in FULLISH or phase == "oracle"):
         sh(["python3", "admin_oracle.py"])
     if ok and (phase in FULLISH or phase == "same_day"):

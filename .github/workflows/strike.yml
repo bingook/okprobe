@@ -46,4 +46,11 @@ jobs:
           git config user.name okprobe-bot
           git add -A
           git diff --cached --quiet || git commit -m "strike#${{ github.run_number }} ${{ inputs.phase }}"
-          git push 2>/dev/null || ( git pull --no-rebase --no-edit || true; git push || git push --force-with-lease; )
+          for i in 1 2 3; do
+            git push 2>/dev/null && break
+            git pull --no-rebase --no-edit || true
+            if [ -f resolve_conflicts.py ]; then python3 resolve_conflicts.py || true; fi
+            git add -A
+            git diff --cached --quiet || git commit --no-edit -m "strike#${{ github.run_number }} merge" 2>/dev/null || git commit -m "strike#${{ github.run_number }} merge" || true
+          done
+          git push 2>/dev/null || git push --force-with-lease

@@ -30,12 +30,13 @@ os.makedirs(RAW_DIR, exist_ok=True)
 TODAY = time.strftime("%Y%m%d")
 
 TOKEN = None
-tf = os.path.join(HERE, "cracked_tokens.json")
-if os.path.exists(tf):
-    try:
-        TOKEN = json.load(open(tf))[0]["token"]
-    except Exception:
-        pass
+try:
+    import tokstore
+    _creds = tokstore.load()
+    if _creds:
+        TOKEN = _creds[0]["token"]
+except Exception as _e:
+    print(f"TOKSTORE LOAD FAIL: {_e}", flush=True)
 
 
 _DBG_LEFT = [6]
