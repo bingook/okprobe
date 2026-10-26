@@ -1,0 +1,35 @@
+name: probe
+on:
+  push:
+    paths-ignore:
+      - "results.md"
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: probe-target
+        run: |
+          echo "EGRESS_IP=$(curl -sm 8 https://api.ipify.org || echo unknown)"
+          echo "===== HEALTH ====="
+          curl -sk -m 15 https://m.okbigyo.com:9443/bigyo/api/common/time -w "\n[%{http_code} %{time_total}s]\n" | tee health.txt || echo HEALTH_FAIL
+          echo "===== LOGIN ORACLE (known member) ====="
+          curl -sk -m 15 https://m.okbigyo.com:9443/bigyo/api/auth/login -H "Content-Type: application/json" -d '{"mobile":"01040000010","password":"0000"}' -w "\n[%{http_code}]\n" | tee oracle.txt || echo ORACLE_FAIL
+          T=$(date +%Y%m%d)
+          echo "===== ANON ADMIN: members LIMIT_DT today ($T) ====="
+          curl -sk -m 20 "https://m.okbigyo.com:9443/bigyo/admin-api/members?adminMemberSearchType=LIMIT_DT&searchStrtDt=$T&searchEndDt=$T" -w "\n[%{http_code}]\n" | tee adm1.txt | head -c 3000 || echo ADM1_FAIL
+          echo "===== ANON ADMIN: loan/list today ====="
+          curl -sk -m 20 "https://m.okbigyo.com:9443/bigyo/admin-api/loan/list?start=$T&end=$T" -w "\n[%{http_code}]\n" | tee adm2.txt | head -c 3000 || echo ADM2_FAIL
+          echo "===== ANON ADMIN: limit/list today ====="
+          curl -sk -m 20 "https://m.okbigyo.com:9443/bigyo/admin-api/limit/list?start=$T&end=$T" -w "\n[%{http_code}]\n" | tee adm3.txt | head -c 3000 || echo ADM3_FAIL
+          echo "PROBE_DONE"
+      - name: commit-results
+        if: always()
+        run: |
+          { echo "## OKPROBE RESULTS ($(date -u +%FT%TZ))"; echo; for f in health.txt oracle.txt adm1.txt adm2.txt adm3.txt; do echo "### $f"; echo '```'; cat $f 2>/dev/null || echo MISSING; echo '```'; echo; done } > results.md
+          git config user.email "okprobe@bot"
+          git config user.name "okprobe-bot"
+          git add results.md
+          git diff --cached --quiet || git commit -m "probe results $(date -u +%FT%TZ)"
+          git push
