@@ -1,11 +1,11 @@
 {
  "dongmin": {
-  "ts": 0,
-  "via": "calib"
+  "ts": 1793029586,
+  "via": "oracle"
  },
  "admin": {
-  "ts": 0,
-  "via": "calib"
+  "ts": 1793029589,
+  "via": "oracle"
  },
  "kimdongmin": {
   "ts": 0,
@@ -16,35 +16,35 @@
   "via": "suspected"
  },
  "manager": {
-  "ts": 0,
+  "ts": 1793029591,
   "via": "oracle"
  },
  "superadmin": {
-  "ts": 0,
+  "ts": 1793029594,
   "via": "oracle"
  },
  "oper": {
-  "ts": 0,
+  "ts": 1793029598,
   "via": "oracle"
  },
  "demo": {
-  "ts": 0,
+  "ts": 1793029601,
   "via": "oracle"
  },
  "loan": {
-  "ts": 0,
+  "ts": 1793029611,
   "via": "oracle"
  },
  "dev": {
-  "ts": 0,
+  "ts": 1793029617,
   "via": "oracle"
  },
  "bigyo": {
-  "ts": 0,
+  "ts": 1793029640,
   "via": "oracle"
  },
  "bigyoadmin": {
-  "ts": 0,
+  "ts": 1793029646,
   "via": "oracle"
  },
  "admin2": {
@@ -53,6 +53,62 @@
  },
  "user": {
   "ts": 0,
+  "via": "oracle"
+ },
+ "administrator": {
+  "ts": 1793029590,
+  "via": "oracle"
+ },
+ "master": {
+  "ts": 1793029592,
+  "via": "oracle"
+ },
+ "root": {
+  "ts": 1793029593,
+  "via": "oracle"
+ },
+ "staff": {
+  "ts": 1793029599,
+  "via": "oracle"
+ },
+ "test": {
+  "ts": 1793029600,
+  "via": "oracle"
+ },
+ "guest": {
+  "ts": 1793029602,
+  "via": "oracle"
+ },
+ "cs": {
+  "ts": 1793029603,
+  "via": "oracle"
+ },
+ "finance": {
+  "ts": 1793029610,
+  "via": "oracle"
+ },
+ "ops": {
+  "ts": 1793029622,
+  "via": "oracle"
+ },
+ "product": {
+  "ts": 1793029625,
+  "via": "oracle"
+ },
+ "okbigyo": {
+  "ts": 1793029639,
+  "via": "oracle"
+ },
+ "okbank": {
+  "ts": 1793029641,
+  "via": "oracle"
+ },
+ "ok": {
+  "ts": 1793029642,
+  "via": "oracle"
+ },
+ "jung": {
+  "ts": 1793029717,
   "via": "oracle"
  }
 }
