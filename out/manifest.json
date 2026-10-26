@@ -1,36 +1,8 @@
 {
-<<<<<<< HEAD
- "ts": "2026-10-26T21:44:31Z",
+ "ts": "2026-10-26T22:43:10Z",
  "phase": "oracle",
- "egress_ip": "135.119.22.208",
-=======
-<<<<<<< HEAD
- "ts": "2026-10-26T21:44:26Z",
- "phase": "oracle",
- "egress_ip": "40.124.101.217",
-=======
-<<<<<<< HEAD
- "ts": "2026-10-26T21:44:31Z",
-=======
-<<<<<<< HEAD
- "ts": "2026-10-26T20:47:26Z",
- "phase": "sweep",
- "egress_ip": "20.221.76.57",
->>>>>>> 83a70087633f7c465c64b7a7d9a16232a5a2fad8
->>>>>>> ec0fab8ab77b15b09aa29fa1423f4737d1a647b2
+ "egress_ip": "172.174.166.192",
  "health": true,
- "enum": [
-  40152000,
-  40168000
- ],
-=======
-<<<<<<< HEAD
- "ts": "2026-10-26T20:58:24Z",
->>>>>>> f36b0bf226f987b4e1c8897ff0141ce896c18611
- "phase": "oracle",
- "egress_ip": "134.33.71.34",
- "health": true,
->>>>>>> 1fb0eadf777e131a7ce2856bbf07330ac59e2af1
  "counts": {
   "members_live.csv": 2658,
   "loans_realtime.csv": 2,
