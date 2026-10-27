@@ -37,6 +37,7 @@ MAX_REQ_PER_MEMBER = 26
 ADD_DONE = os.path.join(HERE, "flow_add_done.json")
 SEQS_FILE = os.path.join(HERE, "flow_seqs.json")
 HITS_CSV = os.path.join(HERE, "flow_hits.csv")
+SAME_DAY_SIG = os.path.join(HERE, "same_day_signals.csv")
 LOG = os.path.join(HERE, "flow_dig_log.jsonl")
 
 CTX = ssl.create_default_context()
@@ -171,13 +172,39 @@ def main():
         for lr in lreqs[:3]:
             probe("lreq_as_seq", "CREDIT", {"bigyoLoanFlwSeq": lr, "applyType": "EXISTING", "step": "1"})
 
-        # 3. check-dup-inquiry: does the session carry recent-inquiry state?
+        # 3. check-dup-inquiry: per-flowType today-search flags (TdySrchYn/Dtm,
+        #    LoReqtNo) — the member-side SAME-DAY indicator.
         if reqs < MAX_REQ_PER_MEMBER:
             reqs += 1
             st, doc = post(tok, "/bigyo/api/bigyo/check-dup-inquiry", {})
             journal({"ts": time.strftime("%FT%TZ", time.gmtime()), "mobile": mob,
                      "kind": "dup_inquiry", "status": st, "doc": doc})
             print(f"DUPINQ {mob} -> {st} {json.dumps(doc, ensure_ascii=False)[:200]}", flush=True)
+            rows = (doc or {}).get("data") if isinstance(doc, dict) else None
+            if isinstance(rows, list):
+                sd_new = not os.path.exists(SAME_DAY_SIG)
+                for r in rows:
+                    if not isinstance(r, dict):
+                        continue
+                    tdy = str(r.get("TdySrchYn") or "")
+                    lreq = r.get("LoReqtNo")
+                    if lreq:
+                        lreqs.append(str(lreq))
+                    with open(SAME_DAY_SIG, "a", newline="") as f:
+                        import csv
+                        w = csv.writer(f)
+                        if sd_new:
+                            w.writerow(["ts", "mobile", "name", "flowType", "tdySrchYn",
+                                        "tdySrchDtm", "loReqtNo", "sucResExistsYn",
+                                        "maxLimit", "minRate"])
+                            sd_new = False
+                        w.writerow([time.strftime("%FT%TZ", time.gmtime()), mob, name,
+                                    r.get("FlowType", ""), tdy, r.get("TdySrchDtm", ""),
+                                    lreq or "", r.get("SucResExistsYn", ""),
+                                    r.get("MaxLimit", ""), r.get("MinRate", "")])
+                    if tdy == "Y":
+                        print(f"★★★ TDY_SRCH {mob} {name} flow={r.get('FlowType')} "
+                              f"dTM={r.get('TdySrchDtm')} loReqtNo={lreq}", flush=True)
             time.sleep(PACE)
 
         # 4. step-"-1" identity-group ADD (bundle contract: ci, memberType,
