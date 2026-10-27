@@ -274,7 +274,13 @@
    "pwd_idx": 251
   },
   "superadmin": {
-   "pwd_idx": 70
+   "pwd_idx": 251
+  },
+  "test": {
+   "pwd_idx": 251
+  },
+  "user": {
+   "pwd_idx": 251
   }
  },
  "bridge": {
@@ -357,7 +363,16 @@
    "pwd_idx": 12
   },
   "product": {
-   "pwd_idx": 8
+   "pwd_idx": 12
+  },
+  "qa": {
+   "pwd_idx": 12
+  },
+  "root": {
+   "pwd_idx": 12
+  },
+  "staff": {
+   "pwd_idx": 12
   }
  },
  "derive": {
