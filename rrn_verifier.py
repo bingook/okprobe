@@ -10,7 +10,7 @@ Candidate space per member: birthday (6d, from myinfo) + gender digit 1-4
 + serial 000000..999999 = 4M. Sequential scan with persisted cursors;
 stops a member permanently on a positive verdict.
 
-Budget: RRNV_PER_RUN (default 2000) probes total, 0.5s pace.
+Budget: RRNV_PER_RUN (default 3500) probes total, 0.5s pace.
 State: rrn_verify_state.json. Verdicts journaled to rrn_verify_log.jsonl.
 """
 import json
@@ -26,7 +26,7 @@ import tokstore
 HERE = os.path.dirname(os.path.abspath(__file__))
 BASE = "https://m.okbigyo.com:9443/bigyo/api/auth/check-nice-UsrAuth"
 PACE = float(os.environ.get("RRNV_PACE", "0.5"))
-BUDGET = int(os.environ.get("RRNV_PER_RUN", "2000"))
+BUDGET = int(os.environ.get("RRNV_PER_RUN", "3500"))
 SERIALS = 1000000
 STATES = os.path.join(HERE, "rrn_verify_state.json")
 LOGF = os.path.join(HERE, "rrn_verify_log.jsonl")
