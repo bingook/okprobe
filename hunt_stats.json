@@ -1,5 +1,1 @@
-<<<<<<< HEAD
-{"tested": 16000, "members": 226, "errors": 4, "rps": 14.74, "elapsed_s": 1085}
-=======
-{"tested": 16000, "members": 226, "errors": 4, "rps": 16.74, "elapsed_s": 955}
->>>>>>> 9140ca6319947e2955cb90a5c1c6e61978859b7a
+{"tested": 16000, "members": 210, "errors": 0, "rps": 14.81, "elapsed_s": 1080}
