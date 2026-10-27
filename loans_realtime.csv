@@ -1,3 +1,5 @@
 mobile,name,bankName,productName,loReqtNo,loanType,resultCode,resultLabel,amount,rate,date,pulledAt
 01040039341,여동수,(없음),,,,,,,,,2026-10-26 20:10:44
 01040062401,김영란,(없음),,,,,,,,,2026-10-26 20:10:47
+mobile,name,bankName,productName,loReqtNo,loanType,resultCode,resultLabel,amount,rate,date,pulledAt
+01040362147,김창령,(없음),,,,,,,,,2026-10-27 21:08:28

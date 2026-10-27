@@ -1,0 +1,27 @@
+{
+ "loans": {
+  "result": "SUCCESS",
+  "reason": "성공",
+  "data": [],
+  "total": null
+ },
+ "myinfo": {
+  "success": true,
+  "data": {
+   "memberSeq": 116,
+   "mobile": "01040362147",
+   "mobileEnc": "632D065D617C0F58BC7D39FC5CE1E9DE",
+   "name": "김창령",
+   "pinNumber": "",
+   "nickName": null,
+   "socialSecurityNumber": "95AF2E7E6C8063199535FE21E9D881F2",
+   "carrier": "SKT",
+   "birthday": "840208"
+  },
+  "message": "",
+  "total": null
+ },
+ "summary": {
+  "error": "HTTP Error 500: Internal Server Error"
+ }
+}

@@ -20,5 +20,16 @@
    "data": null,
    "total": null
   }
+ },
+ "01040362147": {
+  "ts": "2026-10-27T22:14:04Z",
+  "fmt": "step_-1",
+  "status": 200,
+  "resp": {
+   "result": "FAIL",
+   "reason": "\ub300\ucd9c\uc2e0\uccad\uc774\uc5b4\ud558\uae30\uc870\ud68c \uc624\ub958",
+   "data": null,
+   "total": null
+  }
  }
 }
