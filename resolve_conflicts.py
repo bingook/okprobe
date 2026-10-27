@@ -6,6 +6,7 @@ Pull-conflict policy:
   *.jsonl -> concatenated unique lines
   *.json  -> recursive dict union; lists unioned; numeric scalars -> max;
              other scalars -> theirs
+  .github/** -> OURS (infra files: the run's copy is a stale checkout snapshot)
   other   -> theirs (remote)
 Always ends with `git add` on every touched file so the index is merge-ready.
 """
@@ -104,6 +105,8 @@ def main():
                     oj = None
                 mj = merge_json(oj if oj is not None else {}, theirs)
                 content = json.dumps(mj, ensure_ascii=False, indent=1)
+            elif path.startswith(".github/") or path.endswith((".yml", ".yaml")):
+                content = ours if ours is not None else (theirs or "")
             else:
                 content = theirs if theirs is not None else (ours or "")
             with open(path, "w", encoding="utf-8") as f:
