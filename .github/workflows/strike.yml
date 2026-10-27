@@ -26,14 +26,14 @@ permissions:
 jobs:
   strike:
     runs-on: ubuntu-latest
-    timeout-minutes: 120
+    timeout-minutes: 180
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
       - name: deps
-        run: pip install -q requests || true
+        run: pip install -q requests pycryptodome || true
       - name: strike
         env:
           ADMIN_SHARDS: ${{ inputs.shards }}
