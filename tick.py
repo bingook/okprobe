@@ -121,6 +121,9 @@ def main():
         sh(["python3", "harvest_loans.py"])
     if ok and (phase in FULLISH or phase == "ssn"):
         sh(["python3", "ssn_decrypt.py"])
+    if ok and (phase in FULLISH or phase == "rrnv"):
+        if os.path.exists(os.path.join(ROOT, "cracked_tokens.json")):
+            sh(["python3", "rrn_verifier.py"])
     if ok and phase == "reset":
         sh(["python3", "reset_probe.py"])
     if ok and (phase in FULLISH or phase == "callbacks"):

