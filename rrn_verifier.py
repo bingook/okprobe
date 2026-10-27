@@ -112,10 +112,9 @@ def main():
             sig = body[:120].replace("\n", " ")
             journal({"ts": time.strftime("%FT%TZ", time.gmtime()), "mobile": mob,
                      "rrn": rrn, "http": hs, "sig": sig})
-            low = body.lower()
-            if hs == 200 and ('"result":"success"' in low.replace(" ", "") or
-                               '"result": "success"' in low or '"verifiyn":"y"' in low or
-                               '"verifyyn":"y"' in low or '"validyn":"y"' in low):
+            low = body.lower().replace(" ", "")
+            if hs == 200 and ('"chksucyn":"y"' in low or '"verifiyn":"y"' in low or
+                              '"verifyyn":"y"' in low or '"validyn":"y"' in low):
                 positives += 1
                 st["matched"] = {"rrn": rrn, "body": body[:500], "ts": time.strftime("%FT%TZ", time.gmtime())}
                 print(f"★★★★ RRN MATCH {mob} {rrn} :: {body[:200]}", flush=True)
