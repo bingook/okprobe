@@ -139,6 +139,9 @@ def main():
     if ok and (phase in FULLISH or phase == "flowdig"):
         if os.path.exists(os.path.join(ROOT, "cracked_tokens.json")):
             sh(["python3", "flow_digger.py"])
+    if ok and (phase in FULLISH or phase == "lchkmap"):
+        if os.path.exists(os.path.join(ROOT, "cracked_tokens.json")):
+            sh(["python3", "lchk_mapper.py"])
     if ok and (phase in FULLISH or phase == "idor"):
         if os.path.exists(os.path.join(ROOT, "cracked_tokens.json")):
             toks = load("cracked_tokens.json", [])
