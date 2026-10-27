@@ -20,6 +20,35 @@ CTX.verify_mode = ssl.CERT_NONE
 
 MEMBERS_FILE = "members_live.csv"
 CRACKED_FILE = "cracked_tokens.json"
+
+def load_json_salvage(fp, default):
+    """Parse JSON; if git-conflict markers leaked in, take-theirs and retry."""
+    try:
+        with open(fp) as f:
+            return json.load(f)
+    except Exception:
+        pass
+    try:
+        lines = open(fp).read().split("\n")
+        out, mode = [], 0
+        for ln in lines:
+            if ln.startswith("<<<<<<<"):
+                mode = 1
+                continue
+            if ln.startswith("=======") and mode == 1:
+                mode = 2
+                continue
+            if ln.startswith(">>>>>>>"):
+                mode = 0
+                continue
+            if mode == 1:
+                continue
+            out.append(ln)
+        return json.loads("\n".join(out))
+    except Exception:
+        return default
+
+
 LOG_FILE = "pin_attack.log"
 
 # Ranked guesses. Policy bans: birthday, strictly sequential (123456), phone-derived.
@@ -83,12 +112,8 @@ def main():
     if not os.path.exists(MEMBERS_FILE):
         log("no members_live.csv yet")
         return
-    cracked = {}
-    if os.path.exists(CRACKED_FILE):
-        cracked = json.load(open(CRACKED_FILE))
-    state = {}
-    if os.path.exists(STATE_FILE):
-        state = json.load(open(STATE_FILE))
+    cracked = load_json_salvage(CRACKED_FILE, {}) if os.path.exists(CRACKED_FILE) else {}
+    state = load_json_salvage(STATE_FILE, {}) if os.path.exists(STATE_FILE) else {}
     rows = list(csv.reader(open(MEMBERS_FILE)))
     for row in rows:
         if len(row) < 5:

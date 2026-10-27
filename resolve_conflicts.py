@@ -19,12 +19,33 @@ def git(*a):
     return subprocess.run(list(a), capture_output=True, text=True)
 
 
+def strip_markers(text):
+    """Remove git conflict markers (take-theirs per hunk) if any leaked in."""
+    if text is None or "<<<<<<<" not in text:
+        return text
+    out, mode = [], 0
+    for ln in text.splitlines():
+        if ln.startswith("<<<<<<<"):
+            mode = 1
+            continue
+        if ln.startswith("=======") and mode == 1:
+            mode = 2
+            continue
+        if ln.startswith(">>>>>>>"):
+            mode = 0
+            continue
+        if mode == 1:
+            continue
+        out.append(ln)
+    return "\n".join(out)
+
+
 def stage_content(stage, path):
     """stage: ':2:' ours | ':3:' theirs. Returns text or None."""
     r = git("show", f"{stage}:{path}")
     if r.returncode != 0:
         return None
-    return r.stdout
+    return strip_markers(r.stdout)
 
 
 def union_csv(texts, path):
@@ -117,6 +138,21 @@ def main():
             git("checkout", "--theirs", path)
             git("add", path)
             print(f"fallback-theirs {path} ({e})", flush=True)
+    # belt-and-braces: sweep the whole tree for markers inherited from
+    # earlier bad merges (auto-merges never reach the per-file policy)
+    r = git("ls-files")
+    for path in [l.strip() for l in r.stdout.splitlines() if l.strip()]:
+        try:
+            with open(path, encoding="utf-8", errors="replace") as f:
+                txt = f.read()
+            if "<<<<<<<" in txt:
+                clean = strip_markers(txt)
+                with open(path, "w", encoding="utf-8") as f:
+                    f.write(clean if clean.endswith("\n") or not clean else clean + "\n")
+                git("add", path)
+                print(f"swept-markers {path}", flush=True)
+        except OSError:
+            continue
     print("RESOLVE_CONFLICTS DONE", flush=True)
 
 
